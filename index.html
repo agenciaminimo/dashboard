@@ -287,8 +287,8 @@
 <!-- MODAL TOKEN -->
 <div id="modal-token" class="modal-bg" style="display:none">
   <div class="modal">
-    <p class="modal-title">Token Meta Ads</p>
-    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Salvo neste navegador.</p>
+    <p class="modal-title">Atualizar Token Meta Ads</p>
+    <p class="modal-sub">Cole o novo token quando o atual expirar (a cada ~60 dias). Após salvar, atualiza também a variável <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">TOKEN_PADRAO</code> no GitHub para os outros usuários.</p>
     <label>Access Token</label>
     <input type="password" id="modal-token-input" placeholder="EAAxxxxxxx..." style="margin-bottom:8px" />
     <p style="font-size:12px;color:var(--muted);line-height:1.5">Gere em <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--accent)">Graph API Explorer</a> com ads_read + ads_management.</p>
@@ -368,6 +368,10 @@ var OBJ_COLS = {
     { key: 'imp',       label: 'Impressões',     fn: function(ci) { return fmt(ci.impressions,'int'); } },
   ]
 };
+
+// ══ TOKEN PADRÃO ═════════════════════════════════════════════════════════
+// Quando expirar (60 dias), troque aqui e faça commit no GitHub
+var TOKEN_PADRAO = 'EAAtZBfOvxO6YBRFvwGZCFuhW55uF6fnuLcixcPGzuGCviH0q1He43DAVSMtOmKKrY4zmWhrB4IPfQ58RDpVCueWZBZA6M802X6WTGxpobIYYxcbZAqHa4fnxldgLcDZATBZBdMna0EcJ7On2KJJfQxmZBBhjAzY8Ox7T90uz3rJJZCYkZBm7s6DCsooXj799ZBClPlVKZCJQpikzsvHSx0pWMjj8vHlNLqMVT2y9dPDHaB79e0Daf2kWkUVNNxXZBCbTE9echkmRmec6ZB3mbc7SCQT6fc';
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V = 'v20.0';
@@ -548,7 +552,7 @@ function doLogin() {
   if (!uid) { showEl('login-error'); $('login-error').textContent='Selecione um usuário.'; return; }
   var user = USERS[uid];
   if (!user || pass !== user.pass) { showEl('login-error'); $('login-error').textContent='Senha incorreta.'; return; }
-  CURRENT_USER = uid; META_TOKEN = loadToken(uid); PRESET = 'last_30d';
+  CURRENT_USER = uid; META_TOKEN = loadToken(uid) || TOKEN_PADRAO; PRESET = 'last_30d';
   var sl = document.getElementById('screen-login'); sl.style.display='none'; sl.classList.remove('active'); show('screen-accounts');
   setText('topbar-username', user.name);
   $('period-accounts').value = PRESET;
