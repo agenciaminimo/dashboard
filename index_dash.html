@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mínimo · Meta Ads Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d; --bg2: #141414; --bg3: #1c1c1c; --bg4: #242424;
+    --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+    --text: #f0ede8; --muted: #888; --muted2: #555;
+    --accent: #c8f23a; --accent-dim: rgba(200,242,58,0.12); --accent-border: rgba(200,242,58,0.3);
+    --red: #ff5f5f; --orange: #ff9d4a; --green: #4ade80;
+    --radius: 10px; --radius-lg: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; font-size: 14px; }
+
+  /* TOPBAR */
+  .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 52px; background: rgba(13,13,13,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; }
+  .topbar-logo { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
+  .topbar-logo span { color: var(--accent); }
+  .topbar-sep { width: 1px; height: 16px; background: var(--border2); flex-shrink: 0; }
+  .topbar-title { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+  .topbar-user { font-size: 12px; color: var(--muted); }
+  .topbar-user span { color: var(--text); font-weight: 500; }
+  .page { padding: 76px 24px 40px; max-width: 1280px; margin: 0 auto; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 400; cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .btn:hover { background: var(--bg4); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+  .btn-accent { background: var(--accent); color: #0d0d0d; border-color: var(--accent); font-weight: 500; }
+  .btn-accent:hover { background: #d4f550; }
+  .btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
+  .btn-ghost:hover { color: var(--text); background: var(--bg3); border-color: var(--border); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-danger { border-color: rgba(255,95,95,0.3); color: var(--red); background: transparent; }
+  .btn-danger:hover { background: rgba(255,95,95,0.08); }
+
+  /* INPUTS */
+  input, select { font-family: 'DM Sans', sans-serif; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; width: 100%; outline: none; transition: border-color 0.15s; }
+  input:focus, select:focus { border-color: var(--accent); }
+  select option { background: #1c1c1c; }
+  input::placeholder { color: var(--muted2); }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.04em; }
+
+  /* METRIC CARDS */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 28px; }
+  .metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px; }
+  .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .metric-value { font-size: 22px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+
+  /* ACCOUNT CARDS */
+  .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .ac-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; cursor: pointer; transition: all 0.15s; }
+  .ac-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .ac-card-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; }
+  .ac-card-spend { font-size: 20px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--accent); margin-bottom: 6px; line-height: 1; }
+  .ac-card-leads { font-size: 12px; color: var(--muted); }
+  .ac-card-leads span { color: var(--text); font-weight: 500; }
+  .ac-card-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 24px; }
+  .progress-bar-bg { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 2px; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; background: var(--bg2); }
+  th.r, td.r { text-align: right; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  td { padding: 11px 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .td-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  tfoot tr { border-top: 1px solid var(--border2); background: var(--bg2); }
+  tfoot td { padding: 11px 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .badge-green  { background: rgba(74,222,128,0.12);  color: var(--green); }
+  .badge-yellow { background: rgba(255,157,74,0.12);  color: var(--orange); }
+  .badge-gray   { background: var(--bg4);              color: var(--muted); }
+  .badge-red    { background: rgba(255,95,95,0.12);   color: var(--red); }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
+
+  /* ALERTS */
+  .error-box { background: rgba(255,95,95,0.08); border: 1px solid rgba(255,95,95,0.2); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--red); }
+  .warn-box { background: rgba(255,157,74,0.08); border: 1px solid rgba(255,157,74,0.25); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--orange); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* LOGIN */
+  #screen-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .login-box { width: 100%; max-width: 360px; }
+  .login-logo { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .login-logo span { color: var(--accent); }
+  .login-title { font-size: 26px; font-weight: 300; margin-bottom: 32px; color: var(--text); }
+  .login-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .login-hint { font-size: 12px; color: var(--muted2); margin-top: 14px; line-height: 1.6; text-align: center; }
+  .login-hint code { font-family: 'DM Mono', monospace; color: var(--muted); background: var(--bg3); padding: 1px 5px; border-radius: 4px; }
+
+  /* TOKEN MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 420px; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* SECTION */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .section-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .section-title { font-size: 18px; font-weight: 400; }
+  .section-title span { color: var(--muted); font-weight: 300; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* SPINNER */
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* SEARCH */
+  .search-wrap { position: relative; max-width: 240px; }
+  .search-wrap input { padding-left: 32px; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted2); font-size: 14px; pointer-events: none; }
+
+  /* TOKEN STATUS */
+  .token-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: var(--radius); border: 1px solid var(--border); transition: all 0.15s; }
+  .token-status:hover { border-color: var(--border2); color: var(--text); }
+  .token-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .token-dot.warn { background: var(--orange); }
+  .token-dot.missing { background: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ══ TELA DE LOGIN ══════════════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <p class="login-logo">Mínimo <span>·</span> Marketing</p>
+    <h1 class="login-title">Meta Ads<br>Dashboard</h1>
+    <div class="login-card">
+      <div class="form-group">
+        <label>Usuário</label>
+        <select id="login-user">
+          <option value="">Selecione...</option>
+          <option value="alvaro">Álvaro</option>
+          <option value="rafael">Rafael</option>
+          <option value="ediel">Ediel</option>
+          <option value="pedro">Pedro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-pass" placeholder="••••••••" />
+      </div>
+      <div id="login-error" class="error-box" style="display:none"></div>
+      <button class="btn btn-accent" id="btn-login" style="width:100%;justify-content:center;margin-top:4px">Entrar</button>
+    </div>
+    <p class="login-hint">Senha padrão: <code>minimo@2025</code></p>
+  </div>
+</div>
+
+<!-- ══ TELA DE CONTAS ═════════════════════════════════════════════════════ -->
+<div id="screen-accounts" class="screen">
+  <div class="topbar">
+    <span class="topbar-logo">Mínimo <span>·</span></span>
+    <span class="topbar-sep"></span>
+    <span class="topbar-title">Meta Ads</span>
+    <div class="topbar-right">
+      <div class="token-status" id="token-status-btn" title="Clique para atualizar o token">
+        <span class="token-dot" id="token-dot"></span>
+        <span id="token-status-label">Token</span>
+      </div>
+      <select id="period-accounts" style="width:auto;min-width:130px">
+        <option value="today">Hoje</option>
+        <option value="yesterday">Ontem</option>
+        <option value="last_7d">7 dias</option>
+        <option value="last_30d" selected>30 dias</option>
+        <option value="this_month">Este mês</option>
+        <option value="last_month">Mês passado</option>
+      </select>
+      <span class="topbar-user">Olá, <span id="topbar-username">—</span></span>
+      <button class="btn btn-ghost btn-sm" id="btn-logout">Sair</button>
+    </div>
+  </div>
+  <div class="page">
+    <div id="no-token-warn" class="warn-box" style="display:none">
+      <span>⚠ Nenhum token Meta configurado. Configure para ver os dados.</span>
+      <button class="btn btn-sm" id="btn-set-token-warn">Configurar token</button>
+    </div>
+    <div class="section-header">
+      <div>
+        <p class="section-eyebrow">Contas ativas no período</p>
+        <h2 class="section-title" id="ac-count-title">—</h2>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="ac-search" placeholder="Buscar conta..." />
+      </div>
+    </div>
+    <div id="ac-progress" class="progress-wrap" style="display:none">
+      <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
+      <p class="progress-label" id="progress-label">Verificando contas...</p>
+    </div>
+    <div id="ac-error" class="error-box" style="display:none"></div>
+    <div class="ac-grid" id="ac-grid"></div>
+  </div>
+</div>
+
+<!-- ══ TELA DE DETALHE ════════════════════════════════════════════════════ -->
+<div id="screen-detail" class="screen">
+  <div class="topbar">
+    <button class="btn btn-ghost btn-sm" id="btn-back">← Contas</button>
+    <span class="topbar-sep"></span>
+    <span class="topbar-title" id="detail-title">—</span>
+    <div class="topbar-right">
+      <div id="detail-loading" style="display:none"><span class="spinner"></span></div>
+      <select id="period-detail" style="width:auto;min-width:130px">
+        <option value="today">Hoje</option>
+        <option value="yesterday">Ontem</option>
+        <option value="last_7d">7 dias</option>
+        <option value="last_30d" selected>30 dias</option>
+        <option value="this_month">Este mês</option>
+        <option value="last_month">Mês passado</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" id="btn-logout2">Sair</button>
+    </div>
+  </div>
+  <div class="page">
+    <div id="detail-error" class="error-box" style="display:none"></div>
+    <div class="metric-grid" id="metric-grid"></div>
+    <div class="section-header" style="margin-bottom:14px">
+      <div>
+        <p class="section-eyebrow">Campanhas</p>
+        <h3 class="section-title" id="camp-count">—</h3>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-status="ALL">Todas</button>
+        <button class="filter-btn" data-status="ACTIVE">Ativas</button>
+        <button class="filter-btn" data-status="PAUSED">Pausadas</button>
+        <button class="filter-btn" data-status="ARCHIVED">Arquivadas</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Campanha</th><th>Status</th>
+            <th class="r">Investimento</th><th class="r">Leads</th><th class="r">CPL</th>
+            <th class="r">CTR</th><th class="r">CPC</th><th class="r">Alcance</th><th class="r">Impressões</th>
+          </tr>
+        </thead>
+        <tbody id="camp-tbody"></tbody>
+        <tfoot id="camp-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL TOKEN ════════════════════════════════════════════════════════ -->
+<div id="modal-token" class="modal-bg" style="display:none">
+  <div class="modal">
+    <p class="modal-title">Token Meta Ads</p>
+    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Ele fica salvo neste navegador e só você acessa.</p>
+    <label>Access Token</label>
+    <input type="password" id="modal-token-input" placeholder="EAAxxxxxxx..." style="margin-bottom:8px" />
+    <p id="modal-token-hint" style="font-size:12px;color:var(--muted);line-height:1.5">Gere um novo token no <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--accent)">Graph API Explorer</a> com as permissões ads_read e ads_management.</p>
+    <div id="modal-token-error" class="error-box" style="display:none;margin-top:12px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="btn-modal-cancel">Cancelar</button>
+      <button class="btn btn-accent" id="btn-modal-save">Salvar e conectar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ USUÁRIOS ══════════════════════════════════════════════════════════════
+var USERS = {
+  alvaro: { name: 'Álvaro',  pass: 'minimo@2025' },
+  rafael: { name: 'Rafael',  pass: 'minimo@2025' },
+  ediel:  { name: 'Ediel',   pass: 'minimo@2025' },
+  pedro:  { name: 'Pedro',   pass: 'minimo@2025' }
+};
+
+// ══ ESTADO ════════════════════════════════════════════════════════════════
+var V = 'v20.0';
+var BASE = 'https://graph.facebook.com/' + V;
+var CURRENT_USER = null;
+var META_TOKEN = '';
+var PRESET = 'last_30d';
+var ACCOUNT = null;
+var CAMPAIGNS = [];
+var ALL_ACCOUNTS = [];
+var STATUS_FILTER = 'ALL';
+
+// ══ HELPERS ═══════════════════════════════════════════════════════════════
+var $ = function(id) { return document.getElementById(id); };
+var show = function(id) { $(id).classList.add('active'); };
+var hide = function(id) { $(id).classList.remove('active'); };
+var showEl = function(id, v) { $(id).style.display = (v === false ? 'none' : ''); };
+var setText = function(id, t) { $(id).textContent = t; };
+
+function tokenKey(user) { return 'meta_token_' + user; }
+
+function loadToken(user) {
+  return localStorage.getItem(tokenKey(user)) || '';
+}
+
+function saveToken(user, token) {
+  localStorage.setItem(tokenKey(user), token);
+}
+
+function fmt(val, type, currency) {
+  currency = currency || 'BRL';
+  if (val === null || val === undefined) return '—';
+  var n = parseFloat(val);
+  if (isNaN(n)) return '—';
+  if (type === 'currency') return n.toLocaleString('pt-BR', { style: 'currency', currency: currency, minimumFractionDigits: 2 });
+  if (type === 'pct') return n.toFixed(2) + '%';
+  if (type === 'int') return Math.round(n).toLocaleString('pt-BR');
+  return n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+}
+
+function getLeads(actions) {
+  if (!actions) return null;
+  var types = ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead'];
+  for (var i = 0; i < types.length; i++) {
+    var a = actions.find(function(x) { return x.action_type === types[i]; });
+    if (a) return parseInt(a.value);
+  }
+  return null;
+}
+
+function getCPL(cpat) {
+  if (!cpat) return null;
+  var types = ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead'];
+  for (var i = 0; i < types.length; i++) {
+    var a = cpat.find(function(x) { return x.action_type === types[i]; });
+    if (a) return parseFloat(a.value);
+  }
+  return null;
+}
+
+function apiFetch(url) {
+  return fetch(url).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.error) throw new Error('(' + d.error.code + ') ' + d.error.message);
+    return d;
+  });
+}
+
+function fetchInsights(id, preset) {
+  var url = BASE + '/' + id + '/insights?fields=spend,impressions,reach,clicks,ctr,cpc,actions,cost_per_action_type&date_preset=' + preset + '&access_token=' + META_TOKEN;
+  return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
+}
+
+var STATUS_MAP = {
+  ACTIVE:      { label: 'Ativa',     cls: 'badge-green' },
+  PAUSED:      { label: 'Pausada',   cls: 'badge-yellow' },
+  DELETED:     { label: 'Removida',  cls: 'badge-red' },
+  ARCHIVED:    { label: 'Arquivada', cls: 'badge-gray' },
+  WITH_ISSUES: { label: 'Problema',  cls: 'badge-yellow' }
+};
+function makeBadge(s) {
+  var m = STATUS_MAP[s] || STATUS_MAP.ARCHIVED;
+  return '<span class="badge ' + m.cls + '">' + m.label + '</span>';
+}
+
+function updateTokenStatus() {
+  var dot = $('token-dot');
+  var label = $('token-status-label');
+  if (!META_TOKEN) {
+    dot.className = 'token-dot missing';
+    label.textContent = 'Sem token';
+  } else {
+    dot.className = 'token-dot';
+    label.textContent = 'Token ativo';
+  }
+}
+
+// ══ LOGIN ═════════════════════════════════════════════════════════════════
+$('btn-login').onclick = doLogin;
+$('login-pass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+
+function doLogin() {
+  var userId = $('login-user').value;
+  var pass = $('login-pass').value;
+  showEl('login-error', false);
+
+  if (!userId) {
+    showEl('login-error');
+    $('login-error').textContent = 'Selecione um usuário.';
+    return;
+  }
+  var user = USERS[userId];
+  if (!user || pass !== user.pass) {
+    showEl('login-error');
+    $('login-error').textContent = 'Senha incorreta.';
+    return;
+  }
+
+  CURRENT_USER = userId;
+  META_TOKEN = loadToken(userId);
+  PRESET = 'last_30d';
+
+  hide('screen-login');
+  show('screen-accounts');
+  setText('topbar-username', user.name);
+  $('period-accounts').value = PRESET;
+  updateTokenStatus();
+
+  if (!META_TOKEN) {
+    showEl('no-token-warn');
+    setText('ac-count-title', '—');
+  } else {
+    showEl('no-token-warn', false);
+    fetchAccounts();
+  }
+}
+
+function doLogout() {
+  CURRENT_USER = null; META_TOKEN = ''; ACCOUNT = null; CAMPAIGNS = []; ALL_ACCOUNTS = [];
+  ['screen-accounts','screen-detail'].forEach(hide);
+  show('screen-login');
+  $('login-pass').value = '';
+  showEl('login-error', false);
+}
+
+$('btn-logout').onclick = doLogout;
+$('btn-logout2').onclick = doLogout;
+
+// ══ TOKEN MODAL ════════════════════════════════════════════════════════════
+function openTokenModal() {
+  $('modal-token-input').value = META_TOKEN || '';
+  showEl('modal-token-error', false);
+  showEl('modal-token');
+}
+function closeTokenModal() { showEl('modal-token', false); }
+
+$('token-status-btn').onclick = openTokenModal;
+$('btn-set-token-warn').onclick = openTokenModal;
+$('btn-modal-cancel').onclick = closeTokenModal;
+
+$('btn-modal-save').onclick = function() {
+  var t = $('modal-token-input').value.trim();
+  if (!t) { showEl('modal-token-error'); $('modal-token-error').textContent = 'Cole o token antes de salvar.'; return; }
+
+  $('btn-modal-save').textContent = 'Verificando...';
+  $('btn-modal-save').disabled = true;
+
+  apiFetch(BASE + '/me?fields=id,name&access_token=' + t)
+    .then(function() {
+      META_TOKEN = t;
+      saveToken(CURRENT_USER, t);
+      updateTokenStatus();
+      closeTokenModal();
+      showEl('no-token-warn', false);
+      fetchAccounts();
+    })
+    .catch(function(e) {
+      showEl('modal-token-error');
+      $('modal-token-error').textContent = e.message;
+    })
+    .finally(function() {
+      $('btn-modal-save').textContent = 'Salvar e conectar';
+      $('btn-modal-save').disabled = false;
+    });
+};
+
+// Fechar modal clicando fora
+$('modal-token').onclick = function(e) { if (e.target === $('modal-token')) closeTokenModal(); };
+
+// ══ CONTAS ════════════════════════════════════════════════════════════════
+$('period-accounts').onchange = function(e) {
+  PRESET = e.target.value;
+  if (META_TOKEN) fetchAccounts();
+};
+
+$('ac-search').addEventListener('input', function() {
+  renderAccountGrid(ALL_ACCOUNTS);
+});
+
+function fetchAccounts() {
+  ALL_ACCOUNTS = [];
+  setText('ac-count-title', 'Carregando...');
+  $('ac-grid').innerHTML = '';
+  showEl('ac-error', false);
+
+  apiFetch(BASE + '/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token=' + META_TOKEN)
+    .then(function(d) {
+      if (!d.data || d.data.length === 0) {
+        setText('ac-count-title', '0 contas');
+        showEl('ac-error');
+        $('ac-error').textContent = 'Nenhuma conta encontrada para este token.';
+        return;
+      }
+      loadAccountsWithSpend(d.data);
+    })
+    .catch(function(e) {
+      setText('ac-count-title', '—');
+      showEl('ac-error');
+      $('ac-error').textContent = e.message;
+    });
+}
+
+function loadAccountsWithSpend(accounts) {
+  ALL_ACCOUNTS = [];
+  setText('ac-count-title', 'Verificando ' + accounts.length + ' contas...');
+  showEl('ac-progress');
+  $('progress-bar').style.width = '0%';
+  setText('progress-label', 'Aguarde...');
+
+  var total = accounts.length;
+  var done = 0;
+  var active = [];
+  var BATCH = 10;
+  var batches = [];
+  for (var i = 0; i < accounts.length; i += BATCH) batches.push(accounts.slice(i, i + BATCH));
+
+  function runBatch(idx) {
+    if (idx >= batches.length) {
+      showEl('ac-progress', false);
+      ALL_ACCOUNTS = active.sort(function(a, b) { return parseFloat(b.insights.spend) - parseFloat(a.insights.spend); });
+      renderAccountGrid(ALL_ACCOUNTS);
+      return;
+    }
+    Promise.all(batches[idx].map(function(ac) {
+      return fetchInsights(ac.id, PRESET).then(function(ins) {
+        done++;
+        var pct = Math.round((done / total) * 100);
+        $('progress-bar').style.width = pct + '%';
+        setText('progress-label', 'Verificando ' + done + ' de ' + total + '...');
+        if (ins && parseFloat(ins.spend || 0) > 0) {
+          active.push(Object.assign({}, ac, { insights: ins }));
+          renderAccountGrid(active.sort(function(a, b) { return parseFloat(b.insights.spend) - parseFloat(a.insights.spend); }));
+        }
+      }).catch(function() { done++; });
+    })).then(function() { runBatch(idx + 1); });
+  }
+  runBatch(0);
+}
+
+function renderAccountGrid(accounts) {
+  var search = ($('ac-search').value || '').toLowerCase();
+  var filtered = search ? accounts.filter(function(ac) { return ac.name.toLowerCase().indexOf(search) >= 0; }) : accounts;
+  $('ac-count-title').innerHTML = filtered.length + ' <span>conta' + (filtered.length !== 1 ? 's' : '') + ' ativas</span>';
+  var grid = $('ac-grid');
+  grid.innerHTML = '';
+  filtered.forEach(function(ac) {
+    var ins = ac.insights;
+    var leads = getLeads(ins.actions);
+    var cpl = getCPL(ins.cost_per_action_type);
+    var card = document.createElement('div');
+    card.className = 'ac-card';
+    card.innerHTML =
+      '<div class="ac-card-name" title="' + ac.name + '">' + ac.name + '</div>' +
+      '<div class="ac-card-spend">' + fmt(ins.spend, 'currency', ac.currency) + '</div>' +
+      '<div class="ac-card-leads">Leads: <span>' + (leads !== null ? leads : '—') + '</span>' +
+        (cpl !== null ? ' &nbsp;·&nbsp; CPL: <span>' + fmt(cpl, 'currency', ac.currency) + '</span>' : '') +
+      '</div>' +
+      '<div class="ac-card-sub"><span>' + (ac.currency || 'BRL') + '</span><span>CTR ' + fmt(ins.ctr, 'pct') + '</span></div>';
+    card.onclick = function() { openAccount(ac); };
+    grid.appendChild(card);
+  });
+}
+
+// ══ DETALHE ════════════════════════════════════════════════════════════════
+$('btn-back').onclick = function() { hide('screen-detail'); show('screen-accounts'); };
+$('period-detail').onchange = function(e) { PRESET = e.target.value; if (ACCOUNT) loadDetail(ACCOUNT); };
+
+function openAccount(ac) {
+  ACCOUNT = ac;
+  PRESET = $('period-accounts').value;
+  hide('screen-accounts');
+  show('screen-detail');
+  $('period-detail').value = PRESET;
+  setText('detail-title', ac.name);
+  loadDetail(ac);
+}
+
+function loadDetail(ac) {
+  showEl('detail-loading');
+  showEl('detail-error', false);
+  $('camp-tbody').innerHTML = '<tr><td colspan="9" class="empty">Carregando...</td></tr>';
+  $('camp-tfoot').innerHTML = '';
+  renderMetrics(ac.insights || null, ac.currency);
+
+  Promise.all([
+    fetchInsights(ac.id, PRESET),
+    apiFetch(BASE + '/' + ac.id + '/campaigns?fields=name,status,objective&limit=100&access_token=' + META_TOKEN)
+  ]).then(function(res) {
+    renderMetrics(res[0], ac.currency || 'BRL');
+    var camps = res[1].data || [];
+    return Promise.all(camps.map(function(c) {
+      return fetchInsights(c.id, PRESET).then(function(ci) { return Object.assign({}, c, { insights: ci }); });
+    }));
+  }).then(function(list) {
+    CAMPAIGNS = list;
+    renderCampaigns();
+  }).catch(function(e) {
+    $('detail-error').textContent = e.message;
+    showEl('detail-error');
+    $('camp-tbody').innerHTML = '';
+  }).finally(function() {
+    showEl('detail-loading', false);
+  });
+}
+
+function renderMetrics(ins, currency) {
+  currency = currency || 'BRL';
+  var leads = ins ? getLeads(ins.actions) : null;
+  var cpl = ins ? getCPL(ins.cost_per_action_type) : null;
+  var L = !ins;
+  var items = [
+    { label: 'Investimento', val: L ? '...' : fmt(ins && ins.spend, 'currency', currency) },
+    { label: 'Leads',        val: L ? '...' : (leads !== null ? fmt(leads, 'int') : '—') },
+    { label: 'CPL',          val: L ? '...' : (cpl !== null ? fmt(cpl, 'currency', currency) : '—') },
+    { label: 'CTR',          val: L ? '...' : fmt(ins && ins.ctr, 'pct') },
+    { label: 'CPC',          val: L ? '...' : fmt(ins && ins.cpc, 'currency', currency) },
+    { label: 'Alcance',      val: L ? '...' : fmt(ins && ins.reach, 'int') },
+    { label: 'Impressões',   val: L ? '...' : fmt(ins && ins.impressions, 'int') }
+  ];
+  $('metric-grid').innerHTML = items.map(function(x) {
+    return '<div class="metric-card"><div class="metric-label">' + x.label + '</div><div class="metric-value">' + x.val + '</div></div>';
+  }).join('');
+}
+
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.onclick = function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    STATUS_FILTER = btn.dataset.status;
+    renderCampaigns();
+  };
+});
+
+function renderCampaigns() {
+  var filtered = STATUS_FILTER === 'ALL' ? CAMPAIGNS : CAMPAIGNS.filter(function(c) { return c.status === STATUS_FILTER; });
+  var currency = ACCOUNT && ACCOUNT.currency ? ACCOUNT.currency : 'BRL';
+  setText('camp-count', filtered.length + ' campanha' + (filtered.length !== 1 ? 's' : ''));
+  if (!filtered.length) {
+    $('camp-tbody').innerHTML = '<tr><td colspan="9" class="empty">Nenhuma campanha para este filtro.</td></tr>';
+    $('camp-tfoot').innerHTML = '';
+    return;
+  }
+  $('camp-tbody').innerHTML = filtered.map(function(c) {
+    var ci = c.insights;
+    var cl = ci ? getLeads(ci.actions) : null;
+    var cc = ci ? getCPL(ci.cost_per_action_type) : null;
+    return '<tr>' +
+      '<td class="td-name" title="' + c.name + '">' + c.name + '</td>' +
+      '<td>' + makeBadge(c.status) + '</td>' +
+      '<td class="r">' + (ci ? fmt(ci.spend,'currency',currency) : '—') + '</td>' +
+      '<td class="r">' + (cl !== null ? fmt(cl,'int') : '—') + '</td>' +
+      '<td class="r">' + (cc !== null ? fmt(cc,'currency',currency) : '—') + '</td>' +
+      '<td class="r">' + (ci ? fmt(ci.ctr,'pct') : '—') + '</td>' +
+      '<td class="r">' + (ci ? fmt(ci.cpc,'currency',currency) : '—') + '</td>' +
+      '<td class="r">' + (ci ? fmt(ci.reach,'int') : '—') + '</td>' +
+      '<td class="r">' + (ci ? fmt(ci.impressions,'int') : '—') + '</td>' +
+      '</tr>';
+  }).join('');
+  if (filtered.length > 1) {
+    var ts = filtered.reduce(function(s,c) { return s + (c.insights ? parseFloat(c.insights.spend||0) : 0); }, 0);
+    var tl = filtered.reduce(function(s,c) { return s + (c.insights ? (getLeads(c.insights.actions)||0) : 0); }, 0);
+    $('camp-tfoot').innerHTML = '<tr>' +
+      '<td style="color:var(--muted)">Total</td><td></td>' +
+      '<td class="r" style="color:var(--text)">' + fmt(ts,'currency',currency) + '</td>' +
+      '<td class="r" style="color:var(--text)">' + fmt(tl,'int') + '</td>' +
+      '<td class="r" style="color:var(--text)">' + (tl > 0 ? fmt(ts/tl,'currency',currency) : '—') + '</td>' +
+      '<td colspan="4"></td></tr>';
+  }
+}
+</script>
+</body>
+</html>
