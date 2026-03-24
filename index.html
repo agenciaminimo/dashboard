@@ -53,14 +53,19 @@
   .obj-other      { background: var(--bg4);             color: var(--muted); }
 
   /* METRIC CARDS */
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 28px; }
-  .metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px; }
-  .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
-  .metric-value { font-size: 22px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
-  .metric-delta { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1px; margin-bottom: 28px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .metric-card { background: var(--bg2); padding: 18px 16px; position: relative; transition: background 0.15s; }
+  .metric-card:hover { background: var(--bg3); }
+  .metric-card.metric-highlight { background: var(--bg3); }
+  .metric-label { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .metric-icon { width: 14px; height: 14px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+  .metric-value { font-size: 24px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
+  .metric-value.metric-accent { color: var(--accent); }
+  .metric-delta { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
   .delta-bad  { color: var(--red); }
   .delta-good { color: var(--green); }
   .delta-neutral { color: var(--muted); }
+  .metric-sublabel { font-size: 11px; color: var(--muted2); margin-top: 3px; }
 
   /* ACCOUNT CARDS */
   .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
@@ -371,7 +376,7 @@ var OBJ_COLS = {
 
 // ══ TOKEN PADRÃO ═════════════════════════════════════════════════════════
 // Quando expirar (60 dias), troque aqui e faça commit no GitHub
-var TOKEN_PADRAO = 'EAAtZBfOvxO6YBRFvwGZCFuhW55uF6fnuLcixcPGzuGCviH0q1He43DAVSMtOmKKrY4zmWhrB4IPfQ58RDpVCueWZBZA6M802X6WTGxpobIYYxcbZAqHa4fnxldgLcDZATBZBdMna0EcJ7On2KJJfQxmZBBhjAzY8Ox7T90uz3rJJZCYkZBm7s6DCsooXj799ZBClPlVKZCJQpikzsvHSx0pWMjj8vHlNLqMVT2y9dPDHaB79e0Daf2kWkUVNNxXZBCbTE9echkmRmec6ZB3mbc7SCQT6fc';
+var TOKEN_PADRAO = 'COLE_SEU_TOKEN_AQUI';
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V = 'v20.0';
@@ -410,6 +415,46 @@ function getLeads(actions) {
     if (a) return parseInt(a.value);
   }
   return null;
+}
+
+// Detecta resultado principal real da conta independente do objetivo declarado
+function getMainResult(ins) {
+  if (!ins) return null;
+  var actions = ins.actions || [];
+  var cpat = ins.cost_per_action_type || [];
+
+  // Prioridade de detecção: o que realmente aconteceu
+  var checks = [
+    // Leads / formulários
+    { types: ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead'], label: 'Leads', costLabel: 'CPL', lowerIsBetter: true },
+    // WhatsApp / mensagens
+    { types: ['onsite_conversion.messaging_conversation_started_7d','onsite_conversion.total_messaging_connection','whatsapp_business_connected','fb_messaging_conversation_started_7d','messaging_call'], label: 'Conversas WA', costLabel: 'Custo/Conv.', lowerIsBetter: true },
+    // Cliques no link
+    { types: ['link_click'], label: 'Cliques', costLabel: 'CPC', lowerIsBetter: true },
+    // Engajamento
+    { types: ['post_engagement','page_engagement'], label: 'Engajamentos', costLabel: 'Custo/Eng.', lowerIsBetter: true },
+    // Video views
+    { types: ['video_view','video_thruplay_watched'], label: 'Views', costLabel: 'CPV', lowerIsBetter: true },
+  ];
+
+  for (var i = 0; i < checks.length; i++) {
+    var chk = checks[i];
+    for (var j = 0; j < chk.types.length; j++) {
+      var act = actions.find(function(x) { return x.action_type === chk.types[j]; });
+      if (act && parseInt(act.value) > 0) {
+        var costAct = cpat.find(function(x) { return x.action_type === chk.types[j]; });
+        return {
+          label: chk.label,
+          costLabel: chk.costLabel,
+          value: parseInt(act.value),
+          cost: costAct ? parseFloat(costAct.value) : null,
+          lowerIsBetter: chk.lowerIsBetter
+        };
+      }
+    }
+  }
+  // Fallback: alcance
+  return ins.reach ? { label: 'Alcance', costLabel: 'CPM', value: parseInt(ins.reach), cost: parseFloat(ins.cpm||0)||null, lowerIsBetter: true } : null;
 }
 function getCPL(cpat) {
   if (!cpat) return null;
@@ -644,47 +689,30 @@ function renderAccountGrid(accounts) {
 
     // Determina tipo dominante das campanhas (usamos dados gerais da conta)
     // Para o card, usa leads como padrão mas mostra métricas reais disponíveis
-    var leads=getLeads(ins.actions);
-    var cpl=getCPL(ins.cost_per_action_type);
-    var prevLeads=prev?getLeads(prev.actions):null;
-    var prevCpl=prev?getCPL(prev.cost_per_action_type):null;
-    var deltaCpl=calcDelta(cpl,prevCpl);
-    var deltaLeads=calcDelta(leads,prevLeads);
+    // Detecta resultado principal real
+    var result = getMainResult(ins);
+    var prevResult = prev ? getMainResult(prev) : null;
+    var deltaResult = calcDelta(result&&result.value, prevResult&&prevResult.value);
+    var deltaCost   = calcDelta(result&&result.cost,  prevResult&&prevResult.cost);
 
-    // CTR como fallback universal
-    var deltaCtr=calcDelta(parseFloat(ins.ctr||0),prev?parseFloat(prev.ctr||0):null);
-
-    // Alertas: CPL piorou OU investimento piorou
+    // Alertas baseados no resultado real da conta
     var alerts=[];
-    if (deltaCpl!==null&&deltaCpl>ALERT_THRESHOLD) alerts.push('CPL +'+deltaCpl.toFixed(1)+'%');
+    if (deltaCost!==null&&deltaCost>ALERT_THRESHOLD) alerts.push((result?result.costLabel:'Custo')+' +'+deltaCost.toFixed(1)+'%');
     if (deltaSpend!==null&&deltaSpend>ALERT_THRESHOLD) alerts.push('Investimento +'+deltaSpend.toFixed(1)+'%');
     if (alerts.length) alertCount++;
 
     var card=document.createElement('div');
     card.className='ac-card'+(alerts.length?' has-alert':'');
 
-    var kpiBlock = '';
-    if (leads !== null) {
-      kpiBlock =
-        '<div class="ac-card-row">' +
-          '<div class="ac-card-kpi">Leads: <span>'+leads+'</span></div>' +
-          buildAcDelta(deltaLeads,false) +
-        '</div>' +
-        '<div class="ac-card-row">' +
-          '<div class="ac-card-kpi">CPL: <span>'+(cpl!==null?fmt(cpl,'currency',ac.currency):'—')+'</span></div>' +
-          buildAcDelta(deltaCpl,true) +
-        '</div>';
-    } else {
-      // Conta sem leads: mostra CTR e cliques
-      kpiBlock =
-        '<div class="ac-card-row">' +
-          '<div class="ac-card-kpi">CTR: <span>'+fmt(ins.ctr,'pct')+'</span></div>' +
-          buildAcDelta(deltaCtr,false) +
-        '</div>' +
-        '<div class="ac-card-row">' +
-          '<div class="ac-card-kpi">Cliques: <span>'+fmt(ins.clicks,'int')+'</span></div>' +
-        '</div>';
-    }
+    var kpiBlock =
+      '<div class="ac-card-row">' +
+        '<div class="ac-card-kpi">'+(result?result.label:'Resultado')+': <span>'+(result?fmt(result.value,'int'):'—')+'</span></div>' +
+        buildAcDelta(deltaResult, false) +
+      '</div>' +
+      '<div class="ac-card-row">' +
+        '<div class="ac-card-kpi">'+(result?result.costLabel:'Custo')+': <span>'+(result&&result.cost!==null?fmt(result.cost,'currency',ac.currency):'—')+'</span></div>' +
+        buildAcDelta(deltaCost, true) +
+      '</div>';
 
     card.innerHTML=
       (alerts.length?'<div class="alert-badge">⚠</div>':'')+
@@ -740,24 +768,40 @@ function loadDetail(ac) {
 
 function renderMetrics(ins, prev, currency) {
   currency=currency||'BRL';
-  var leads=ins?getLeads(ins.actions):null;
-  var cpl=ins?getCPL(ins.cost_per_action_type):null;
-  var prevLeads=prev?getLeads(prev.actions):null;
-  var prevCpl=prev?getCPL(prev.cost_per_action_type):null;
   var L=!ins;
+
+  // Detecta resultado principal real
+  var result = ins ? getMainResult(ins) : null;
+  var prevResult = prev ? getMainResult(prev) : null;
+
+  var resultLabel = result ? result.label : 'Resultado';
+  var costLabel   = result ? result.costLabel : 'Custo';
+  var resultVal   = result ? fmt(result.value,'int') : '—';
+  var costVal     = result && result.cost !== null ? fmt(result.cost,'currency',currency) : '—';
+  var deltaResult = calcDelta(result&&result.value, prevResult&&prevResult.value);
+  var deltaCost   = calcDelta(result&&result.cost,  prevResult&&prevResult.cost);
+
+  var ICONS = { 'Investimento':'R$','Leads':'◎','Conversas WA':'✆','Cliques':'↗','Engajamentos':'♡','Views':'▶','Alcance':'◉','CPL':'◎','Custo/Conv.':'✆','CPC':'↗','CTR':'%','CPM':'◉','Impressões':'≡','Frequência':'↺' };
+  function icon(lbl) { return ICONS[lbl]||'·'; }
+
   var items=[
-    {label:'Investimento',val:L?'...':fmt(ins.spend,'currency',currency),delta:calcDelta(ins&&parseFloat(ins.spend),prev&&parseFloat(prev.spend)),low:true},
-    {label:'Leads',val:L?'...':(leads!==null?fmt(leads,'int'):'—'),delta:calcDelta(leads,prevLeads),low:false},
-    {label:'CPL',val:L?'...':(cpl!==null?fmt(cpl,'currency',currency):'—'),delta:calcDelta(cpl,prevCpl),low:true},
-    {label:'Cliques',val:L?'...':fmt(ins&&ins.clicks,'int'),delta:calcDelta(ins&&parseFloat(ins.clicks),prev&&parseFloat(prev.clicks)),low:false},
-    {label:'CTR',val:L?'...':fmt(ins&&ins.ctr,'pct'),delta:calcDelta(ins&&parseFloat(ins.ctr),prev&&parseFloat(prev.ctr)),low:false},
-    {label:'CPM',val:L?'...':fmt(ins&&ins.cpm,'currency',currency),delta:calcDelta(ins&&parseFloat(ins.cpm),prev&&parseFloat(prev.cpm)),low:true},
-    {label:'Alcance',val:L?'...':fmt(ins&&ins.reach,'int'),delta:calcDelta(ins&&parseFloat(ins.reach),prev&&parseFloat(prev.reach)),low:false},
-    {label:'Impressões',val:L?'...':fmt(ins&&ins.impressions,'int'),delta:calcDelta(ins&&parseFloat(ins.impressions),prev&&parseFloat(prev.impressions)),low:false},
+    {label:'Investimento', icon:'R$',  val:L?'...':fmt(ins.spend,'currency',currency), delta:calcDelta(ins&&parseFloat(ins.spend),prev&&parseFloat(prev.spend)), low:true,  accent:false, highlight:false},
+    {label:resultLabel,    icon:icon(resultLabel), val:L?'...':resultVal, delta:deltaResult, low:false, accent:true,  highlight:true},
+    {label:costLabel,      icon:icon(costLabel),   val:L?'...':costVal,   delta:deltaCost,   low:true,  accent:false, highlight:true},
+    {label:'CTR',          icon:'%',   val:L?'...':fmt(ins&&ins.ctr,'pct'), delta:calcDelta(ins&&parseFloat(ins.ctr),prev&&parseFloat(prev.ctr)), low:false, accent:false, highlight:false},
+    {label:'CPC',          icon:'↗',   val:L?'...':fmt(ins&&ins.cpc,'currency',currency), delta:calcDelta(ins&&parseFloat(ins.cpc),prev&&parseFloat(prev.cpc)), low:true, accent:false, highlight:false},
+    {label:'CPM',          icon:'◉',   val:L?'...':fmt(ins&&ins.cpm,'currency',currency), delta:calcDelta(ins&&parseFloat(ins.cpm),prev&&parseFloat(prev.cpm)), low:true, accent:false, highlight:false},
+    {label:'Alcance',      icon:'◉',   val:L?'...':fmt(ins&&ins.reach,'int'), delta:calcDelta(ins&&parseFloat(ins.reach),prev&&parseFloat(prev.reach)), low:false, accent:false, highlight:false},
+    {label:'Impressões',   icon:'≡',   val:L?'...':fmt(ins&&ins.impressions,'int'), delta:calcDelta(ins&&parseFloat(ins.impressions),prev&&parseFloat(prev.impressions)), low:false, accent:false, highlight:false},
   ];
+
   $('metric-grid').innerHTML=items.map(function(x){
-    return '<div class="metric-card"><div class="metric-label">'+x.label+'</div><div class="metric-value">'+x.val+'</div>'+
-      (!L&&x.delta!==null?deltaHtml(x.delta,x.low):'')+
+    var cls='metric-card'+(x.highlight?' metric-highlight':'');
+    var valCls='metric-value'+(x.accent?' metric-accent':'');
+    return '<div class="'+cls+'">'+
+      '<div class="metric-label"><span class="metric-icon" style="background:var(--bg4);color:var(--muted)">'+x.icon+'</span>'+x.label+'</div>'+
+      '<div class="'+valCls+'">'+x.val+'</div>'+
+      (!L&&x.delta!==null?deltaHtml(x.delta,x.low):'<div class="metric-sublabel">—</div>')+
     '</div>';
   }).join('');
 }
@@ -770,7 +814,9 @@ document.querySelectorAll('.filter-btn').forEach(function(btn) {
 });
 
 function renderCampaigns() {
-  var filtered=STATUS_FILTER==='ALL'?CAMPAIGNS:CAMPAIGNS.filter(function(c){return c.status===STATUS_FILTER;});
+  // Remove campanhas sem gasto no período
+  var withSpend = CAMPAIGNS.filter(function(c){ return c.insights && parseFloat(c.insights.spend||0) > 0; });
+  var filtered=STATUS_FILTER==='ALL'?withSpend:withSpend.filter(function(c){return c.status===STATUS_FILTER;});
   var currency=ACCOUNT&&ACCOUNT.currency?ACCOUNT.currency:'BRL';
   setText('camp-count',filtered.length+' campanha'+(filtered.length!==1?'s':''));
 
