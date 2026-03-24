@@ -18,7 +18,6 @@
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; font-size: 14px; }
 
-  /* TOPBAR */
   .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 52px; background: rgba(13,13,13,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; }
   .topbar-logo { font-size: 12px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
   .topbar-logo span { color: var(--accent); }
@@ -29,7 +28,6 @@
   .topbar-user span { color: var(--text); font-weight: 500; }
   .page { padding: 76px 24px 40px; max-width: 1280px; margin: 0 auto; }
 
-  /* BUTTONS */
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 400; cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
   .btn:hover { background: var(--bg4); }
   .btn:active { transform: scale(0.98); }
@@ -39,10 +37,7 @@
   .btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
   .btn-ghost:hover { color: var(--text); background: var(--bg3); border-color: var(--border); }
   .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .btn-danger { border-color: rgba(255,95,95,0.3); color: var(--red); background: transparent; }
-  .btn-danger:hover { background: rgba(255,95,95,0.08); }
 
-  /* INPUTS */
   input, select { font-family: 'DM Sans', sans-serif; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius); padding: 9px 12px; font-size: 13px; width: 100%; outline: none; transition: border-color 0.15s; }
   input:focus, select:focus { border-color: var(--accent); }
   select option { background: #1c1c1c; }
@@ -54,22 +49,49 @@
   .metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px; }
   .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
   .metric-value { font-size: 22px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+  .metric-delta { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .delta-up-bad  { color: var(--red); }
+  .delta-up-good { color: var(--green); }
+  .delta-down-bad  { color: var(--red); }
+  .delta-down-good { color: var(--green); }
+  .delta-neutral { color: var(--muted); }
 
   /* ACCOUNT CARDS */
-  .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-  .ac-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; cursor: pointer; transition: all 0.15s; }
+  .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .ac-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; cursor: pointer; transition: all 0.15s; position: relative; }
   .ac-card:hover { border-color: var(--border2); background: var(--bg3); }
-  .ac-card-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; }
-  .ac-card-spend { font-size: 20px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--accent); margin-bottom: 6px; line-height: 1; }
+  .ac-card.has-alert { border-color: rgba(255,157,74,0.35); }
+  .ac-card.has-alert:hover { border-color: rgba(255,157,74,0.6); }
+  .ac-card-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; padding-right: 28px; }
+  .ac-card-spend { font-size: 20px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+  .ac-card-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
   .ac-card-leads { font-size: 12px; color: var(--muted); }
   .ac-card-leads span { color: var(--text); font-weight: 500; }
-  .ac-card-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .ac-card-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+  /* DELTAS NO CARD */
+  .ac-delta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+  .ac-delta.bad  { color: var(--orange); }
+  .ac-delta.good { color: var(--green); }
+  .ac-delta.neutral { color: var(--muted); }
+
+  /* ALERT BADGE */
+  .alert-badge { position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,157,74,0.15); border: 1px solid rgba(255,157,74,0.4); display: flex; align-items: center; justify-content: center; font-size: 11px; }
+
+  /* ALERT STRIP */
+  .alert-strip { background: rgba(255,157,74,0.08); border: 1px solid rgba(255,157,74,0.2); border-radius: var(--radius); padding: 10px 14px; margin-top: 8px; font-size: 12px; color: var(--orange); line-height: 1.5; }
 
   /* PROGRESS */
   .progress-wrap { margin-bottom: 24px; }
   .progress-bar-bg { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; }
   .progress-bar { height: 2px; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
   .progress-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+  /* THRESHOLD BAR */
+  .threshold-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; }
+  .threshold-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .threshold-bar input[type=range] { flex: 1; background: transparent; border: none; padding: 0; height: 4px; accent-color: var(--accent); }
+  .threshold-val { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--accent); min-width: 36px; text-align: right; }
 
   /* TABLE */
   .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); }
@@ -85,24 +107,20 @@
   tfoot tr { border-top: 1px solid var(--border2); background: var(--bg2); }
   tfoot td { padding: 11px 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
 
-  /* BADGES */
   .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
   .badge-green  { background: rgba(74,222,128,0.12);  color: var(--green); }
   .badge-yellow { background: rgba(255,157,74,0.12);  color: var(--orange); }
   .badge-gray   { background: var(--bg4);              color: var(--muted); }
   .badge-red    { background: rgba(255,95,95,0.12);   color: var(--red); }
 
-  /* FILTERS */
   .filters { display: flex; gap: 6px; flex-wrap: wrap; }
   .filter-btn { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
   .filter-btn:hover { border-color: var(--border2); color: var(--text); }
   .filter-btn.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
 
-  /* ALERTS */
   .error-box { background: rgba(255,95,95,0.08); border: 1px solid rgba(255,95,95,0.2); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--red); }
   .warn-box { background: rgba(255,157,74,0.08); border: 1px solid rgba(255,157,74,0.25); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--orange); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
-  /* LOGIN */
   #screen-login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .login-box { width: 100%; max-width: 360px; }
   .login-logo { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
@@ -113,44 +131,40 @@
   .login-hint { font-size: 12px; color: var(--muted2); margin-top: 14px; line-height: 1.6; text-align: center; }
   .login-hint code { font-family: 'DM Mono', monospace; color: var(--muted); background: var(--bg3); padding: 1px 5px; border-radius: 4px; }
 
-  /* TOKEN MODAL */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 28px; width: 100%; max-width: 420px; }
   .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; }
   .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
 
-  /* SECTION */
   .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
   .section-eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
   .section-title { font-size: 18px; font-weight: 400; }
   .section-title span { color: var(--muted); font-weight: 300; }
 
-  /* SCREENS */
   .screen { display: none; }
   .screen.active { display: block; }
-
-  /* SPINNER */
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
 
-  /* SEARCH */
   .search-wrap { position: relative; max-width: 240px; }
   .search-wrap input { padding-left: 32px; }
   .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted2); font-size: 14px; pointer-events: none; }
 
-  /* TOKEN STATUS */
   .token-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: var(--radius); border: 1px solid var(--border); transition: all 0.15s; }
   .token-status:hover { border-color: var(--border2); color: var(--text); }
   .token-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-  .token-dot.warn { background: var(--orange); }
   .token-dot.missing { background: var(--red); }
+
+  /* PERIOD COMPARE LABEL */
+  .period-compare { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
+  .period-compare span { color: var(--muted2); }
 </style>
 </head>
 <body>
 
-<!-- ══ TELA DE LOGIN ══════════════════════════════════════════════════════ -->
+<!-- LOGIN -->
 <div id="screen-login" class="screen active">
   <div class="login-box">
     <p class="login-logo">Mínimo <span>·</span> Marketing</p>
@@ -177,14 +191,14 @@
   </div>
 </div>
 
-<!-- ══ TELA DE CONTAS ═════════════════════════════════════════════════════ -->
+<!-- ACCOUNTS -->
 <div id="screen-accounts" class="screen">
   <div class="topbar">
     <span class="topbar-logo">Mínimo <span>·</span></span>
     <span class="topbar-sep"></span>
     <span class="topbar-title">Meta Ads</span>
     <div class="topbar-right">
-      <div class="token-status" id="token-status-btn" title="Clique para atualizar o token">
+      <div class="token-status" id="token-status-btn">
         <span class="token-dot" id="token-dot"></span>
         <span id="token-status-label">Token</span>
       </div>
@@ -202,13 +216,22 @@
   </div>
   <div class="page">
     <div id="no-token-warn" class="warn-box" style="display:none">
-      <span>⚠ Nenhum token Meta configurado. Configure para ver os dados.</span>
+      <span>⚠ Nenhum token Meta configurado.</span>
       <button class="btn btn-sm" id="btn-set-token-warn">Configurar token</button>
     </div>
+
+    <!-- THRESHOLD SLIDER -->
+    <div class="threshold-bar" id="threshold-bar" style="display:none">
+      <span class="threshold-label">🔔 Alertar se CPL ou investimento piorar mais de</span>
+      <input type="range" id="threshold-slider" min="5" max="50" step="5" value="20" />
+      <span class="threshold-val" id="threshold-val">20%</span>
+    </div>
+
     <div class="section-header">
       <div>
         <p class="section-eyebrow">Contas ativas no período</p>
         <h2 class="section-title" id="ac-count-title">—</h2>
+        <p class="period-compare" id="period-compare-label" style="display:none"></p>
       </div>
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
@@ -224,7 +247,7 @@
   </div>
 </div>
 
-<!-- ══ TELA DE DETALHE ════════════════════════════════════════════════════ -->
+<!-- DETAIL -->
 <div id="screen-detail" class="screen">
   <div class="topbar">
     <button class="btn btn-ghost btn-sm" id="btn-back">← Contas</button>
@@ -245,6 +268,7 @@
   </div>
   <div class="page">
     <div id="detail-error" class="error-box" style="display:none"></div>
+    <p class="period-compare" id="detail-compare-label" style="display:none;margin-bottom:16px"></p>
     <div class="metric-grid" id="metric-grid"></div>
     <div class="section-header" style="margin-bottom:14px">
       <div>
@@ -274,14 +298,14 @@
   </div>
 </div>
 
-<!-- ══ MODAL TOKEN ════════════════════════════════════════════════════════ -->
+<!-- MODAL TOKEN -->
 <div id="modal-token" class="modal-bg" style="display:none">
   <div class="modal">
     <p class="modal-title">Token Meta Ads</p>
-    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Ele fica salvo neste navegador e só você acessa.</p>
+    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Salvo neste navegador, só você acessa.</p>
     <label>Access Token</label>
     <input type="password" id="modal-token-input" placeholder="EAAxxxxxxx..." style="margin-bottom:8px" />
-    <p id="modal-token-hint" style="font-size:12px;color:var(--muted);line-height:1.5">Gere um novo token no <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--accent)">Graph API Explorer</a> com as permissões ads_read e ads_management.</p>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5">Gere em <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--accent)">Graph API Explorer</a> com ads_read + ads_management.</p>
     <div id="modal-token-error" class="error-box" style="display:none;margin-top:12px"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="btn-modal-cancel">Cancelar</button>
@@ -309,6 +333,50 @@ var ACCOUNT = null;
 var CAMPAIGNS = [];
 var ALL_ACCOUNTS = [];
 var STATUS_FILTER = 'ALL';
+var ALERT_THRESHOLD = 20; // %
+
+// ══ PERÍODOS ANTERIORES ═══════════════════════════════════════════════════
+// Mapeia preset atual → preset do período anterior equivalente
+var PREV_PRESET_MAP = {
+  'today':      'yesterday',
+  'yesterday':  'yesterday', // fallback
+  'last_7d':    'last_7d',   // buscaremos via date range
+  'last_30d':   'last_30d',
+  'this_month': 'last_month',
+  'last_month': 'last_month'
+};
+
+// Retorna date range do período anterior (para presets baseados em dias)
+function getPrevDateRange(preset) {
+  var now = new Date();
+  var days = preset === 'last_7d' ? 7 : preset === 'last_30d' ? 30 : 0;
+  if (!days) return null;
+  // Período atual: últimos N dias (até ontem)
+  // Período anterior: N dias antes disso
+  var end = new Date(now); end.setDate(end.getDate() - 1);
+  var start = new Date(end); start.setDate(start.getDate() - (days - 1));
+  var prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
+  var prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - (days - 1));
+  return {
+    since: fmtDate(prevStart),
+    until: fmtDate(prevEnd)
+  };
+}
+
+function fmtDate(d) {
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+
+function getPrevLabel(preset) {
+  if (preset === 'today') return 'vs ontem';
+  if (preset === 'yesterday') return 'vs anteontem';
+  if (preset === 'last_7d') return 'vs 7 dias anteriores';
+  if (preset === 'last_30d') return 'vs 30 dias anteriores';
+  if (preset === 'this_month') return 'vs mês passado';
+  if (preset === 'last_month') return 'vs mês retrasado';
+  return 'vs período anterior';
+}
 
 // ══ HELPERS ═══════════════════════════════════════════════════════════════
 var $ = function(id) { return document.getElementById(id); };
@@ -318,14 +386,8 @@ var showEl = function(id, v) { $(id).style.display = (v === false ? 'none' : '')
 var setText = function(id, t) { $(id).textContent = t; };
 
 function tokenKey(user) { return 'meta_token_' + user; }
-
-function loadToken(user) {
-  return localStorage.getItem(tokenKey(user)) || '';
-}
-
-function saveToken(user, token) {
-  localStorage.setItem(tokenKey(user), token);
-}
+function loadToken(user) { return localStorage.getItem(tokenKey(user)) || ''; }
+function saveToken(user, token) { localStorage.setItem(tokenKey(user), token); }
 
 function fmt(val, type, currency) {
   currency = currency || 'BRL';
@@ -336,6 +398,22 @@ function fmt(val, type, currency) {
   if (type === 'pct') return n.toFixed(2) + '%';
   if (type === 'int') return Math.round(n).toLocaleString('pt-BR');
   return n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+}
+
+function calcDelta(curr, prev) {
+  if (!curr || !prev || prev === 0) return null;
+  return ((curr - prev) / Math.abs(prev)) * 100;
+}
+
+// lowerIsBetter: CPL, CPC → subida é ruim; leads, CTR → subida é boa
+function deltaHtml(delta, lowerIsBetter) {
+  if (delta === null) return '';
+  var abs = Math.abs(delta).toFixed(1);
+  var up = delta > 0;
+  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
+  var arrow = up ? '↑' : '↓';
+  var cls = bad ? (up ? 'delta-up-bad' : 'delta-down-bad') : (up ? 'delta-up-good' : 'delta-down-good');
+  return '<div class="metric-delta ' + cls + '">' + arrow + ' ' + abs + '% vs período anterior</div>';
 }
 
 function getLeads(actions) {
@@ -370,6 +448,19 @@ function fetchInsights(id, preset) {
   return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
 }
 
+function fetchInsightsByRange(id, since, until) {
+  var url = BASE + '/' + id + '/insights?fields=spend,impressions,reach,clicks,ctr,cpc,actions,cost_per_action_type&time_range={"since":"' + since + '","until":"' + until + '"}&access_token=' + META_TOKEN;
+  return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
+}
+
+function fetchPrevInsights(id, preset) {
+  var range = getPrevDateRange(preset);
+  if (range) return fetchInsightsByRange(id, range.since, range.until);
+  // Para presets sem date range, usa preset mapeado
+  var prevPreset = PREV_PRESET_MAP[preset] || 'last_30d';
+  return fetchInsights(id, prevPreset);
+}
+
 var STATUS_MAP = {
   ACTIVE:      { label: 'Ativa',     cls: 'badge-green' },
   PAUSED:      { label: 'Pausada',   cls: 'badge-yellow' },
@@ -383,16 +474,16 @@ function makeBadge(s) {
 }
 
 function updateTokenStatus() {
-  var dot = $('token-dot');
-  var label = $('token-status-label');
-  if (!META_TOKEN) {
-    dot.className = 'token-dot missing';
-    label.textContent = 'Sem token';
-  } else {
-    dot.className = 'token-dot';
-    label.textContent = 'Token ativo';
-  }
+  $('token-dot').className = 'token-dot' + (META_TOKEN ? '' : ' missing');
+  setText('token-status-label', META_TOKEN ? 'Token ativo' : 'Sem token');
 }
+
+// ══ THRESHOLD SLIDER ══════════════════════════════════════════════════════
+$('threshold-slider').oninput = function() {
+  ALERT_THRESHOLD = parseInt(this.value);
+  setText('threshold-val', ALERT_THRESHOLD + '%');
+  renderAccountGrid(ALL_ACCOUNTS);
+};
 
 // ══ LOGIN ═════════════════════════════════════════════════════════════════
 $('btn-login').onclick = doLogin;
@@ -402,18 +493,9 @@ function doLogin() {
   var userId = $('login-user').value;
   var pass = $('login-pass').value;
   showEl('login-error', false);
-
-  if (!userId) {
-    showEl('login-error');
-    $('login-error').textContent = 'Selecione um usuário.';
-    return;
-  }
+  if (!userId) { showEl('login-error'); $('login-error').textContent = 'Selecione um usuário.'; return; }
   var user = USERS[userId];
-  if (!user || pass !== user.pass) {
-    showEl('login-error');
-    $('login-error').textContent = 'Senha incorreta.';
-    return;
-  }
+  if (!user || pass !== user.pass) { showEl('login-error'); $('login-error').textContent = 'Senha incorreta.'; return; }
 
   CURRENT_USER = userId;
   META_TOKEN = loadToken(userId);
@@ -427,9 +509,10 @@ function doLogin() {
 
   if (!META_TOKEN) {
     showEl('no-token-warn');
-    setText('ac-count-title', '—');
+    showEl('threshold-bar', false);
   } else {
     showEl('no-token-warn', false);
+    showEl('threshold-bar');
     fetchAccounts();
   }
 }
@@ -439,31 +522,24 @@ function doLogout() {
   ['screen-accounts','screen-detail'].forEach(hide);
   show('screen-login');
   $('login-pass').value = '';
-  showEl('login-error', false);
 }
 
 $('btn-logout').onclick = doLogout;
 $('btn-logout2').onclick = doLogout;
 
 // ══ TOKEN MODAL ════════════════════════════════════════════════════════════
-function openTokenModal() {
-  $('modal-token-input').value = META_TOKEN || '';
-  showEl('modal-token-error', false);
-  showEl('modal-token');
-}
+function openTokenModal() { $('modal-token-input').value = META_TOKEN || ''; showEl('modal-token-error', false); showEl('modal-token'); }
 function closeTokenModal() { showEl('modal-token', false); }
-
 $('token-status-btn').onclick = openTokenModal;
 $('btn-set-token-warn').onclick = openTokenModal;
 $('btn-modal-cancel').onclick = closeTokenModal;
+$('modal-token').onclick = function(e) { if (e.target === $('modal-token')) closeTokenModal(); };
 
 $('btn-modal-save').onclick = function() {
   var t = $('modal-token-input').value.trim();
   if (!t) { showEl('modal-token-error'); $('modal-token-error').textContent = 'Cole o token antes de salvar.'; return; }
-
   $('btn-modal-save').textContent = 'Verificando...';
   $('btn-modal-save').disabled = true;
-
   apiFetch(BASE + '/me?fields=id,name&access_token=' + t)
     .then(function() {
       META_TOKEN = t;
@@ -471,52 +547,39 @@ $('btn-modal-save').onclick = function() {
       updateTokenStatus();
       closeTokenModal();
       showEl('no-token-warn', false);
+      showEl('threshold-bar');
       fetchAccounts();
     })
-    .catch(function(e) {
-      showEl('modal-token-error');
-      $('modal-token-error').textContent = e.message;
-    })
-    .finally(function() {
-      $('btn-modal-save').textContent = 'Salvar e conectar';
-      $('btn-modal-save').disabled = false;
-    });
+    .catch(function(e) { showEl('modal-token-error'); $('modal-token-error').textContent = e.message; })
+    .finally(function() { $('btn-modal-save').textContent = 'Salvar e conectar'; $('btn-modal-save').disabled = false; });
 };
-
-// Fechar modal clicando fora
-$('modal-token').onclick = function(e) { if (e.target === $('modal-token')) closeTokenModal(); };
 
 // ══ CONTAS ════════════════════════════════════════════════════════════════
-$('period-accounts').onchange = function(e) {
-  PRESET = e.target.value;
-  if (META_TOKEN) fetchAccounts();
-};
-
-$('ac-search').addEventListener('input', function() {
-  renderAccountGrid(ALL_ACCOUNTS);
-});
+$('period-accounts').onchange = function(e) { PRESET = e.target.value; if (META_TOKEN) fetchAccounts(); };
+$('ac-search').addEventListener('input', function() { renderAccountGrid(ALL_ACCOUNTS); });
 
 function fetchAccounts() {
   ALL_ACCOUNTS = [];
   setText('ac-count-title', 'Carregando...');
   $('ac-grid').innerHTML = '';
   showEl('ac-error', false);
+  showEl('period-compare-label', false);
 
   apiFetch(BASE + '/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token=' + META_TOKEN)
     .then(function(d) {
       if (!d.data || d.data.length === 0) {
         setText('ac-count-title', '0 contas');
         showEl('ac-error');
-        $('ac-error').textContent = 'Nenhuma conta encontrada para este token.';
+        $('ac-error').textContent = 'Nenhuma conta encontrada.';
         return;
       }
+      // Mostra label de comparação
+      var lbl = $('period-compare-label');
+      lbl.textContent = getPrevLabel(PRESET);
+      showEl('period-compare-label');
       loadAccountsWithSpend(d.data);
     })
-    .catch(function(e) {
-      setText('ac-count-title', '—');
-      showEl('ac-error');
-      $('ac-error').textContent = e.message;
-    });
+    .catch(function(e) { setText('ac-count-title', '—'); showEl('ac-error'); $('ac-error').textContent = e.message; });
 }
 
 function loadAccountsWithSpend(accounts) {
@@ -529,7 +592,7 @@ function loadAccountsWithSpend(accounts) {
   var total = accounts.length;
   var done = 0;
   var active = [];
-  var BATCH = 10;
+  var BATCH = 8;
   var batches = [];
   for (var i = 0; i < accounts.length; i += BATCH) batches.push(accounts.slice(i, i + BATCH));
 
@@ -541,13 +604,19 @@ function loadAccountsWithSpend(accounts) {
       return;
     }
     Promise.all(batches[idx].map(function(ac) {
-      return fetchInsights(ac.id, PRESET).then(function(ins) {
+      // Busca período atual E anterior em paralelo
+      return Promise.all([
+        fetchInsights(ac.id, PRESET),
+        fetchPrevInsights(ac.id, PRESET)
+      ]).then(function(res) {
         done++;
         var pct = Math.round((done / total) * 100);
         $('progress-bar').style.width = pct + '%';
-        setText('progress-label', 'Verificando ' + done + ' de ' + total + '...');
+        setText('progress-label', done + ' de ' + total);
+        var ins = res[0];
+        var prevIns = res[1];
         if (ins && parseFloat(ins.spend || 0) > 0) {
-          active.push(Object.assign({}, ac, { insights: ins }));
+          active.push(Object.assign({}, ac, { insights: ins, prevInsights: prevIns }));
           renderAccountGrid(active.sort(function(a, b) { return parseFloat(b.insights.spend) - parseFloat(a.insights.spend); }));
         }
       }).catch(function() { done++; });
@@ -559,28 +628,82 @@ function loadAccountsWithSpend(accounts) {
 function renderAccountGrid(accounts) {
   var search = ($('ac-search').value || '').toLowerCase();
   var filtered = search ? accounts.filter(function(ac) { return ac.name.toLowerCase().indexOf(search) >= 0; }) : accounts;
+  var alertCount = 0;
+
   $('ac-count-title').innerHTML = filtered.length + ' <span>conta' + (filtered.length !== 1 ? 's' : '') + ' ativas</span>';
   var grid = $('ac-grid');
   grid.innerHTML = '';
+
   filtered.forEach(function(ac) {
     var ins = ac.insights;
+    var prev = ac.prevInsights;
     var leads = getLeads(ins.actions);
     var cpl = getCPL(ins.cost_per_action_type);
+    var prevLeads = prev ? getLeads(prev.actions) : null;
+    var prevCpl = prev ? getCPL(prev.cost_per_action_type) : null;
+    var prevSpend = prev ? parseFloat(prev.spend || 0) : null;
+    var currSpend = parseFloat(ins.spend || 0);
+
+    var deltaCpl = calcDelta(cpl, prevCpl);
+    var deltaSpend = calcDelta(currSpend, prevSpend);
+    var deltaLeads = calcDelta(leads, prevLeads);
+
+    // Verifica alertas
+    var alerts = [];
+    if (deltaCpl !== null && deltaCpl > ALERT_THRESHOLD) alerts.push('CPL subiu ' + deltaCpl.toFixed(1) + '%');
+    if (deltaSpend !== null && deltaSpend > ALERT_THRESHOLD) alerts.push('Investimento subiu ' + deltaSpend.toFixed(1) + '%');
+    if (alerts.length) alertCount++;
+
     var card = document.createElement('div');
-    card.className = 'ac-card';
+    card.className = 'ac-card' + (alerts.length ? ' has-alert' : '');
+
+    var alertBadge = alerts.length ? '<div class="alert-badge">⚠</div>' : '';
+
+    // Deltas inline
+    var spendDeltaHtml = deltaSpend !== null ? buildAcDelta(deltaSpend, true) : '';
+    var cplDeltaHtml   = deltaCpl   !== null ? buildAcDelta(deltaCpl, true)   : '';
+    var leadsDeltaHtml = deltaLeads !== null ? buildAcDelta(deltaLeads, false) : '';
+
+    var alertStrip = alerts.length ? '<div class="alert-strip">⚠ ' + alerts.join(' · ') + '</div>' : '';
+
     card.innerHTML =
+      alertBadge +
       '<div class="ac-card-name" title="' + ac.name + '">' + ac.name + '</div>' +
-      '<div class="ac-card-spend">' + fmt(ins.spend, 'currency', ac.currency) + '</div>' +
-      '<div class="ac-card-leads">Leads: <span>' + (leads !== null ? leads : '—') + '</span>' +
-        (cpl !== null ? ' &nbsp;·&nbsp; CPL: <span>' + fmt(cpl, 'currency', ac.currency) + '</span>' : '') +
+      '<div class="ac-card-row">' +
+        '<div class="ac-card-spend">' + fmt(ins.spend, 'currency', ac.currency) + '</div>' +
+        spendDeltaHtml +
       '</div>' +
-      '<div class="ac-card-sub"><span>' + (ac.currency || 'BRL') + '</span><span>CTR ' + fmt(ins.ctr, 'pct') + '</span></div>';
+      '<div class="ac-card-row">' +
+        '<div class="ac-card-leads">Leads: <span>' + (leads !== null ? leads : '—') + '</span>' + (leadsDeltaHtml ? ' ' + leadsDeltaHtml : '') + '</div>' +
+      '</div>' +
+      '<div class="ac-card-row" style="margin-top:2px">' +
+        '<div class="ac-card-leads">CPL: <span>' + (cpl !== null ? fmt(cpl, 'currency', ac.currency) : '—') + '</span></div>' +
+        cplDeltaHtml +
+      '</div>' +
+      '<div class="ac-card-sub"><span>' + (ac.currency || 'BRL') + '</span><span>CTR ' + fmt(ins.ctr, 'pct') + '</span></div>' +
+      alertStrip;
+
     card.onclick = function() { openAccount(ac); };
     grid.appendChild(card);
   });
+
+  // Resumo de alertas no título
+  if (alertCount > 0) {
+    $('ac-count-title').innerHTML += ' <span style="color:var(--orange);font-size:13px">· ' + alertCount + ' alerta' + (alertCount > 1 ? 's' : '') + '</span>';
+  }
 }
 
-// ══ DETALHE ════════════════════════════════════════════════════════════════
+function buildAcDelta(delta, lowerIsBetter) {
+  if (delta === null) return '';
+  var abs = Math.abs(delta).toFixed(1);
+  var up = delta > 0;
+  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
+  var arrow = up ? '↑' : '↓';
+  var cls = bad ? 'bad' : 'good';
+  return '<div class="ac-delta ' + cls + '">' + arrow + abs + '%</div>';
+}
+
+// ══ DETALHE ═══════════════════════════════════════════════════════════════
 $('btn-back').onclick = function() { hide('screen-detail'); show('screen-accounts'); };
 $('period-detail').onchange = function(e) { PRESET = e.target.value; if (ACCOUNT) loadDetail(ACCOUNT); };
 
@@ -599,14 +722,20 @@ function loadDetail(ac) {
   showEl('detail-error', false);
   $('camp-tbody').innerHTML = '<tr><td colspan="9" class="empty">Carregando...</td></tr>';
   $('camp-tfoot').innerHTML = '';
-  renderMetrics(ac.insights || null, ac.currency);
+  showEl('detail-compare-label', false);
+  renderMetrics(null, null, ac.currency);
 
   Promise.all([
     fetchInsights(ac.id, PRESET),
+    fetchPrevInsights(ac.id, PRESET),
     apiFetch(BASE + '/' + ac.id + '/campaigns?fields=name,status,objective&limit=100&access_token=' + META_TOKEN)
   ]).then(function(res) {
-    renderMetrics(res[0], ac.currency || 'BRL');
-    var camps = res[1].data || [];
+    var ins = res[0], prevIns = res[1];
+    renderMetrics(ins, prevIns, ac.currency || 'BRL');
+    // Label de comparação
+    setText('detail-compare-label', getPrevLabel(PRESET));
+    showEl('detail-compare-label');
+    var camps = res[2].data || [];
     return Promise.all(camps.map(function(c) {
       return fetchInsights(c.id, PRESET).then(function(ci) { return Object.assign({}, c, { insights: ci }); });
     }));
@@ -617,27 +746,33 @@ function loadDetail(ac) {
     $('detail-error').textContent = e.message;
     showEl('detail-error');
     $('camp-tbody').innerHTML = '';
-  }).finally(function() {
-    showEl('detail-loading', false);
-  });
+  }).finally(function() { showEl('detail-loading', false); });
 }
 
-function renderMetrics(ins, currency) {
+function renderMetrics(ins, prev, currency) {
   currency = currency || 'BRL';
-  var leads = ins ? getLeads(ins.actions) : null;
-  var cpl = ins ? getCPL(ins.cost_per_action_type) : null;
+  var leads    = ins  ? getLeads(ins.actions)  : null;
+  var cpl      = ins  ? getCPL(ins.cost_per_action_type)  : null;
+  var prevLeads = prev ? getLeads(prev.actions) : null;
+  var prevCpl   = prev ? getCPL(prev.cost_per_action_type) : null;
   var L = !ins;
+
   var items = [
-    { label: 'Investimento', val: L ? '...' : fmt(ins && ins.spend, 'currency', currency) },
-    { label: 'Leads',        val: L ? '...' : (leads !== null ? fmt(leads, 'int') : '—') },
-    { label: 'CPL',          val: L ? '...' : (cpl !== null ? fmt(cpl, 'currency', currency) : '—') },
-    { label: 'CTR',          val: L ? '...' : fmt(ins && ins.ctr, 'pct') },
-    { label: 'CPC',          val: L ? '...' : fmt(ins && ins.cpc, 'currency', currency) },
-    { label: 'Alcance',      val: L ? '...' : fmt(ins && ins.reach, 'int') },
-    { label: 'Impressões',   val: L ? '...' : fmt(ins && ins.impressions, 'int') }
+    { label: 'Investimento', val: L ? '...' : fmt(ins.spend,'currency',currency), delta: calcDelta(ins && parseFloat(ins.spend), prev && parseFloat(prev.spend)), low: true },
+    { label: 'Leads',        val: L ? '...' : (leads !== null ? fmt(leads,'int') : '—'), delta: calcDelta(leads, prevLeads), low: false },
+    { label: 'CPL',          val: L ? '...' : (cpl !== null ? fmt(cpl,'currency',currency) : '—'), delta: calcDelta(cpl, prevCpl), low: true },
+    { label: 'CTR',          val: L ? '...' : fmt(ins && ins.ctr,'pct'), delta: calcDelta(ins && parseFloat(ins.ctr), prev && parseFloat(prev.ctr)), low: false },
+    { label: 'CPC',          val: L ? '...' : fmt(ins && ins.cpc,'currency',currency), delta: calcDelta(ins && parseFloat(ins.cpc), prev && parseFloat(prev.cpc)), low: true },
+    { label: 'Alcance',      val: L ? '...' : fmt(ins && ins.reach,'int'), delta: calcDelta(ins && parseFloat(ins.reach), prev && parseFloat(prev.reach)), low: false },
+    { label: 'Impressões',   val: L ? '...' : fmt(ins && ins.impressions,'int'), delta: calcDelta(ins && parseFloat(ins.impressions), prev && parseFloat(prev.impressions)), low: false }
   ];
+
   $('metric-grid').innerHTML = items.map(function(x) {
-    return '<div class="metric-card"><div class="metric-label">' + x.label + '</div><div class="metric-value">' + x.val + '</div></div>';
+    return '<div class="metric-card">' +
+      '<div class="metric-label">' + x.label + '</div>' +
+      '<div class="metric-value">' + x.val + '</div>' +
+      (!L && x.delta !== null ? deltaHtml(x.delta, x.low) : '') +
+      '</div>';
   }).join('');
 }
 
