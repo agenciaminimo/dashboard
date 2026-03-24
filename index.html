@@ -13,7 +13,7 @@
     --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
     --text: #f0ede8; --muted: #888; --muted2: #555;
     --accent: #c8f23a; --accent-dim: rgba(200,242,58,0.12); --accent-border: rgba(200,242,58,0.3);
-    --red: #ff5f5f; --orange: #ff9d4a; --green: #4ade80;
+    --red: #ff5f5f; --orange: #ff9d4a; --green: #4ade80; --blue: #60a5fa; --purple: #a78bfa;
     --radius: 10px; --radius-lg: 14px;
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; font-size: 14px; }
@@ -44,16 +44,22 @@
   input::placeholder { color: var(--muted2); }
   label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.04em; }
 
+  /* OBJETIVO BADGES */
+  .obj-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .obj-leads      { background: rgba(200,242,58,0.1);  color: var(--accent); }
+  .obj-traffic    { background: rgba(96,165,250,0.1);  color: var(--blue); }
+  .obj-awareness  { background: rgba(167,139,250,0.1); color: var(--purple); }
+  .obj-engagement { background: rgba(255,157,74,0.1);  color: var(--orange); }
+  .obj-other      { background: var(--bg4);             color: var(--muted); }
+
   /* METRIC CARDS */
   .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 28px; }
   .metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px; }
   .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
   .metric-value { font-size: 22px; font-weight: 300; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
   .metric-delta { font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-  .delta-up-bad  { color: var(--red); }
-  .delta-up-good { color: var(--green); }
-  .delta-down-bad  { color: var(--red); }
-  .delta-down-good { color: var(--green); }
+  .delta-bad  { color: var(--red); }
+  .delta-good { color: var(--green); }
   .delta-neutral { color: var(--muted); }
 
   /* ACCOUNT CARDS */
@@ -63,29 +69,16 @@
   .ac-card.has-alert { border-color: rgba(255,157,74,0.35); }
   .ac-card.has-alert:hover { border-color: rgba(255,157,74,0.6); }
   .ac-card-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 10px; padding-right: 28px; }
-  .ac-card-spend { font-size: 20px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-  .ac-card-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
-  .ac-card-leads { font-size: 12px; color: var(--muted); }
-  .ac-card-leads span { color: var(--text); font-weight: 500; }
+  .ac-card-spend { font-size: 20px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; }
+  .ac-card-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  .ac-card-kpi { font-size: 12px; color: var(--muted); }
+  .ac-card-kpi span { color: var(--text); font-weight: 500; }
   .ac-card-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
-
-  /* DELTAS NO CARD */
   .ac-delta { font-size: 11px; display: flex; align-items: center; gap: 3px; }
   .ac-delta.bad  { color: var(--orange); }
   .ac-delta.good { color: var(--green); }
-  .ac-delta.neutral { color: var(--muted); }
-
-  /* ALERT BADGE */
   .alert-badge { position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,157,74,0.15); border: 1px solid rgba(255,157,74,0.4); display: flex; align-items: center; justify-content: center; font-size: 11px; }
-
-  /* ALERT STRIP */
-  .alert-strip { background: rgba(255,157,74,0.08); border: 1px solid rgba(255,157,74,0.2); border-radius: var(--radius); padding: 10px 14px; margin-top: 8px; font-size: 12px; color: var(--orange); line-height: 1.5; }
-
-  /* PROGRESS */
-  .progress-wrap { margin-bottom: 24px; }
-  .progress-bar-bg { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; }
-  .progress-bar { height: 2px; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
-  .progress-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .alert-strip { background: rgba(255,157,74,0.08); border: 1px solid rgba(255,157,74,0.2); border-radius: var(--radius); padding: 8px 12px; margin-top: 8px; font-size: 12px; color: var(--orange); line-height: 1.5; }
 
   /* THRESHOLD BAR */
   .threshold-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; }
@@ -93,9 +86,15 @@
   .threshold-bar input[type=range] { flex: 1; background: transparent; border: none; padding: 0; height: 4px; accent-color: var(--accent); }
   .threshold-val { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--accent); min-width: 36px; text-align: right; }
 
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 24px; }
+  .progress-bar-bg { height: 2px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 2px; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+  .progress-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
   /* TABLE */
   .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); }
-  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  table { width: 100%; border-collapse: collapse; min-width: 700px; }
   thead tr { border-bottom: 1px solid var(--border); }
   th { padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; background: var(--bg2); }
   th.r, td.r { text-align: right; }
@@ -103,9 +102,15 @@
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: var(--bg3); }
   td { padding: 11px 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
-  .td-name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-name { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tfoot tr { border-top: 1px solid var(--border2); background: var(--bg2); }
   tfoot td { padding: 11px 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  /* CAMPAIGN GROUPS */
+  .camp-group { margin-bottom: 28px; }
+  .camp-group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .camp-group-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .camp-group-count { font-size: 12px; color: var(--muted2); }
 
   .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
   .badge-green  { background: rgba(74,222,128,0.12);  color: var(--green); }
@@ -125,7 +130,7 @@
   .login-box { width: 100%; max-width: 360px; }
   .login-logo { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
   .login-logo span { color: var(--accent); }
-  .login-title { font-size: 26px; font-weight: 300; margin-bottom: 32px; color: var(--text); }
+  .login-title { font-size: 26px; font-weight: 300; margin-bottom: 32px; }
   .login-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; }
   .form-group { margin-bottom: 16px; }
   .login-hint { font-size: 12px; color: var(--muted2); margin-top: 14px; line-height: 1.6; text-align: center; }
@@ -156,10 +161,7 @@
   .token-status:hover { border-color: var(--border2); color: var(--text); }
   .token-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
   .token-dot.missing { background: var(--red); }
-
-  /* PERIOD COMPARE LABEL */
-  .period-compare { font-size: 11px; color: var(--muted); margin-bottom: 20px; }
-  .period-compare span { color: var(--muted2); }
+  .period-compare { font-size: 11px; color: var(--muted2); margin-bottom: 20px; }
 </style>
 </head>
 <body>
@@ -219,14 +221,11 @@
       <span>⚠ Nenhum token Meta configurado.</span>
       <button class="btn btn-sm" id="btn-set-token-warn">Configurar token</button>
     </div>
-
-    <!-- THRESHOLD SLIDER -->
     <div class="threshold-bar" id="threshold-bar" style="display:none">
-      <span class="threshold-label">🔔 Alertar se CPL ou investimento piorar mais de</span>
+      <span class="threshold-label">🔔 Alertar se resultado principal piorar mais de</span>
       <input type="range" id="threshold-slider" min="5" max="50" step="5" value="20" />
       <span class="threshold-val" id="threshold-val">20%</span>
     </div>
-
     <div class="section-header">
       <div>
         <p class="section-eyebrow">Contas ativas no período</p>
@@ -282,19 +281,7 @@
         <button class="filter-btn" data-status="ARCHIVED">Arquivadas</button>
       </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Campanha</th><th>Status</th>
-            <th class="r">Investimento</th><th class="r">Leads</th><th class="r">CPL</th>
-            <th class="r">CTR</th><th class="r">CPC</th><th class="r">Alcance</th><th class="r">Impressões</th>
-          </tr>
-        </thead>
-        <tbody id="camp-tbody"></tbody>
-        <tfoot id="camp-tfoot"></tfoot>
-      </table>
-    </div>
+    <div id="camp-groups"></div>
   </div>
 </div>
 
@@ -302,7 +289,7 @@
 <div id="modal-token" class="modal-bg" style="display:none">
   <div class="modal">
     <p class="modal-title">Token Meta Ads</p>
-    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Salvo neste navegador, só você acessa.</p>
+    <p class="modal-sub">Cole seu Access Token com permissão <code style="font-family:monospace;background:var(--bg3);padding:1px 5px;border-radius:4px">ads_read</code>. Salvo neste navegador.</p>
     <label>Access Token</label>
     <input type="password" id="modal-token-input" placeholder="EAAxxxxxxx..." style="margin-bottom:8px" />
     <p style="font-size:12px;color:var(--muted);line-height:1.5">Gere em <a href="https://developers.facebook.com/tools/explorer" target="_blank" style="color:var(--accent)">Graph API Explorer</a> com ads_read + ads_management.</p>
@@ -317,66 +304,78 @@
 <script>
 // ══ USUÁRIOS ══════════════════════════════════════════════════════════════
 var USERS = {
-  alvaro: { name: 'Álvaro',  pass: 'minimo@2025' },
-  rafael: { name: 'Rafael',  pass: 'minimo@2025' },
-  ediel:  { name: 'Ediel',   pass: 'minimo@2025' },
-  pedro:  { name: 'Pedro',   pass: 'minimo@2025' }
+  alvaro: { name: 'Álvaro', pass: 'minimo@2025' },
+  rafael: { name: 'Rafael', pass: 'minimo@2025' },
+  ediel:  { name: 'Ediel',  pass: 'minimo@2025' },
+  pedro:  { name: 'Pedro',  pass: 'minimo@2025' }
+};
+
+// ══ OBJETIVOS → CONFIGURAÇÃO ══════════════════════════════════════════════
+// Mapeia objective da API → config de exibição
+var OBJ_CONFIG = {
+  // Leads
+  LEAD_GENERATION:  { type: 'leads',      label: 'Leads',       cls: 'obj-leads',      icon: '◎' },
+  OUTCOME_LEADS:    { type: 'leads',      label: 'Leads',       cls: 'obj-leads',      icon: '◎' },
+  // Tráfego
+  LINK_CLICKS:      { type: 'traffic',    label: 'Tráfego',     cls: 'obj-traffic',    icon: '↗' },
+  OUTCOME_TRAFFIC:  { type: 'traffic',    label: 'Tráfego',     cls: 'obj-traffic',    icon: '↗' },
+  // Reconhecimento
+  REACH:            { type: 'awareness',  label: 'Alcance',     cls: 'obj-awareness',  icon: '◉' },
+  BRAND_AWARENESS:  { type: 'awareness',  label: 'Reconhec.',   cls: 'obj-awareness',  icon: '◉' },
+  OUTCOME_AWARENESS:{ type: 'awareness',  label: 'Reconhec.',   cls: 'obj-awareness',  icon: '◉' },
+  // Engajamento
+  POST_ENGAGEMENT:  { type: 'engagement', label: 'Engajamento', cls: 'obj-engagement', icon: '♡' },
+  OUTCOME_ENGAGEMENT:{ type: 'engagement',label: 'Engajamento', cls: 'obj-engagement', icon: '♡' },
+  PAGE_LIKES:       { type: 'engagement', label: 'Engajamento', cls: 'obj-engagement', icon: '♡' },
+  // Conversões
+  CONVERSIONS:      { type: 'leads',      label: 'Conversões',  cls: 'obj-leads',      icon: '◎' },
+  OUTCOME_SALES:    { type: 'leads',      label: 'Vendas',      cls: 'obj-leads',      icon: '◎' },
+};
+
+function getObjConfig(objective) {
+  return OBJ_CONFIG[objective] || { type: 'other', label: objective || 'Outro', cls: 'obj-other', icon: '·' };
+}
+
+// Colunas por tipo de objetivo
+var OBJ_COLS = {
+  leads:      [
+    { key: 'resultado', label: 'Leads',         fn: function(ci) { var l = getLeads(ci.actions); return l !== null ? fmt(l,'int') : '—'; } },
+    { key: 'custo',     label: 'CPL',            fn: function(ci) { var c = getCPL(ci.cost_per_action_type); return c !== null ? fmt(c,'currency') : '—'; } },
+    { key: 'ctr',       label: 'CTR',            fn: function(ci) { return fmt(ci.ctr,'pct'); } },
+    { key: 'alcance',   label: 'Alcance',        fn: function(ci) { return fmt(ci.reach,'int'); } },
+  ],
+  traffic:    [
+    { key: 'resultado', label: 'Cliques',        fn: function(ci) { return fmt(ci.clicks,'int'); } },
+    { key: 'custo',     label: 'CPC',            fn: function(ci) { return fmt(ci.cpc,'currency'); } },
+    { key: 'ctr',       label: 'CTR',            fn: function(ci) { return fmt(ci.ctr,'pct'); } },
+    { key: 'alcance',   label: 'Alcance',        fn: function(ci) { return fmt(ci.reach,'int'); } },
+  ],
+  awareness:  [
+    { key: 'resultado', label: 'Alcance',        fn: function(ci) { return fmt(ci.reach,'int'); } },
+    { key: 'custo',     label: 'CPM',            fn: function(ci) { return fmt(ci.cpm,'currency'); } },
+    { key: 'freq',      label: 'Frequência',     fn: function(ci) { return fmt(ci.frequency,'') ; } },
+    { key: 'imp',       label: 'Impressões',     fn: function(ci) { return fmt(ci.impressions,'int'); } },
+  ],
+  engagement: [
+    { key: 'resultado', label: 'Engajamentos',   fn: function(ci) { return getEngagements(ci) !== null ? fmt(getEngagements(ci),'int') : '—'; } },
+    { key: 'custo',     label: 'Custo/Eng.',     fn: function(ci) { return getCPE(ci) !== null ? fmt(getCPE(ci),'currency') : '—'; } },
+    { key: 'alcance',   label: 'Alcance',        fn: function(ci) { return fmt(ci.reach,'int'); } },
+    { key: 'imp',       label: 'Impressões',     fn: function(ci) { return fmt(ci.impressions,'int'); } },
+  ],
+  other: [
+    { key: 'resultado', label: 'Resultado',      fn: function(ci) { return '—'; } },
+    { key: 'ctr',       label: 'CTR',            fn: function(ci) { return fmt(ci.ctr,'pct'); } },
+    { key: 'alcance',   label: 'Alcance',        fn: function(ci) { return fmt(ci.reach,'int'); } },
+    { key: 'imp',       label: 'Impressões',     fn: function(ci) { return fmt(ci.impressions,'int'); } },
+  ]
 };
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V = 'v20.0';
 var BASE = 'https://graph.facebook.com/' + V;
-var CURRENT_USER = null;
-var META_TOKEN = '';
-var PRESET = 'last_30d';
-var ACCOUNT = null;
-var CAMPAIGNS = [];
-var ALL_ACCOUNTS = [];
-var STATUS_FILTER = 'ALL';
-var ALERT_THRESHOLD = 20; // %
-
-// ══ PERÍODOS ANTERIORES ═══════════════════════════════════════════════════
-// Mapeia preset atual → preset do período anterior equivalente
-var PREV_PRESET_MAP = {
-  'today':      'yesterday',
-  'yesterday':  'yesterday', // fallback
-  'last_7d':    'last_7d',   // buscaremos via date range
-  'last_30d':   'last_30d',
-  'this_month': 'last_month',
-  'last_month': 'last_month'
-};
-
-// Retorna date range do período anterior (para presets baseados em dias)
-function getPrevDateRange(preset) {
-  var now = new Date();
-  var days = preset === 'last_7d' ? 7 : preset === 'last_30d' ? 30 : 0;
-  if (!days) return null;
-  // Período atual: últimos N dias (até ontem)
-  // Período anterior: N dias antes disso
-  var end = new Date(now); end.setDate(end.getDate() - 1);
-  var start = new Date(end); start.setDate(start.getDate() - (days - 1));
-  var prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
-  var prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - (days - 1));
-  return {
-    since: fmtDate(prevStart),
-    until: fmtDate(prevEnd)
-  };
-}
-
-function fmtDate(d) {
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-}
-function pad(n) { return n < 10 ? '0'+n : ''+n; }
-
-function getPrevLabel(preset) {
-  if (preset === 'today') return 'vs ontem';
-  if (preset === 'yesterday') return 'vs anteontem';
-  if (preset === 'last_7d') return 'vs 7 dias anteriores';
-  if (preset === 'last_30d') return 'vs 30 dias anteriores';
-  if (preset === 'this_month') return 'vs mês passado';
-  if (preset === 'last_month') return 'vs mês retrasado';
-  return 'vs período anterior';
-}
+var CURRENT_USER = null, META_TOKEN = '', PRESET = 'last_30d';
+var ACCOUNT = null, CAMPAIGNS = [], ALL_ACCOUNTS = [], STATUS_FILTER = 'ALL';
+var ALERT_THRESHOLD = 20;
 
 // ══ HELPERS ═══════════════════════════════════════════════════════════════
 var $ = function(id) { return document.getElementById(id); };
@@ -384,10 +383,9 @@ var show = function(id) { $(id).classList.add('active'); };
 var hide = function(id) { $(id).classList.remove('active'); };
 var showEl = function(id, v) { $(id).style.display = (v === false ? 'none' : ''); };
 var setText = function(id, t) { $(id).textContent = t; };
-
-function tokenKey(user) { return 'meta_token_' + user; }
-function loadToken(user) { return localStorage.getItem(tokenKey(user)) || ''; }
-function saveToken(user, token) { localStorage.setItem(tokenKey(user), token); }
+function tokenKey(u) { return 'meta_token_' + u; }
+function loadToken(u) { return localStorage.getItem(tokenKey(u)) || ''; }
+function saveToken(u, t) { localStorage.setItem(tokenKey(u), t); }
 
 function fmt(val, type, currency) {
   currency = currency || 'BRL';
@@ -397,35 +395,19 @@ function fmt(val, type, currency) {
   if (type === 'currency') return n.toLocaleString('pt-BR', { style: 'currency', currency: currency, minimumFractionDigits: 2 });
   if (type === 'pct') return n.toFixed(2) + '%';
   if (type === 'int') return Math.round(n).toLocaleString('pt-BR');
+  if (type === '') return n.toFixed(2);
   return n.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
-}
-
-function calcDelta(curr, prev) {
-  if (!curr || !prev || prev === 0) return null;
-  return ((curr - prev) / Math.abs(prev)) * 100;
-}
-
-// lowerIsBetter: CPL, CPC → subida é ruim; leads, CTR → subida é boa
-function deltaHtml(delta, lowerIsBetter) {
-  if (delta === null) return '';
-  var abs = Math.abs(delta).toFixed(1);
-  var up = delta > 0;
-  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
-  var arrow = up ? '↑' : '↓';
-  var cls = bad ? (up ? 'delta-up-bad' : 'delta-down-bad') : (up ? 'delta-up-good' : 'delta-down-good');
-  return '<div class="metric-delta ' + cls + '">' + arrow + ' ' + abs + '% vs período anterior</div>';
 }
 
 function getLeads(actions) {
   if (!actions) return null;
-  var types = ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead'];
+  var types = ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead','onsite_conversion.messaging_conversation_started_7d'];
   for (var i = 0; i < types.length; i++) {
     var a = actions.find(function(x) { return x.action_type === types[i]; });
     if (a) return parseInt(a.value);
   }
   return null;
 }
-
 function getCPL(cpat) {
   if (!cpat) return null;
   var types = ['lead','onsite_conversion.lead_grouped','offsite_conversion.fb_pixel_lead'];
@@ -435,6 +417,84 @@ function getCPL(cpat) {
   }
   return null;
 }
+function getEngagements(ci) {
+  if (!ci || !ci.actions) return null;
+  var types = ['post_engagement','page_engagement'];
+  for (var i = 0; i < types.length; i++) {
+    var a = ci.actions.find(function(x) { return x.action_type === types[i]; });
+    if (a) return parseInt(a.value);
+  }
+  return null;
+}
+function getCPE(ci) {
+  if (!ci || !ci.cost_per_action_type) return null;
+  var types = ['post_engagement','page_engagement'];
+  for (var i = 0; i < types.length; i++) {
+    var a = ci.cost_per_action_type.find(function(x) { return x.action_type === types[i]; });
+    if (a) return parseFloat(a.value);
+  }
+  return null;
+}
+
+// Métrica principal por tipo de objetivo (para alertas e card)
+function getMainKpi(type, ins) {
+  if (!ins) return { label: '—', val: null };
+  if (type === 'leads') {
+    var l = getLeads(ins.actions), c = getCPL(ins.cost_per_action_type);
+    return { label: 'CPL', val: c, secondary: { label: 'Leads', val: l } };
+  }
+  if (type === 'traffic') return { label: 'CPC', val: parseFloat(ins.cpc || 0) || null };
+  if (type === 'awareness') {
+    var cpm = parseFloat(ins.spend || 0) / parseFloat(ins.impressions || 1) * 1000;
+    return { label: 'CPM', val: cpm };
+  }
+  if (type === 'engagement') return { label: 'Eng.', val: getEngagements(ins) };
+  return { label: '—', val: null };
+}
+
+function calcDelta(curr, prev) {
+  if (curr === null || prev === null || !prev) return null;
+  return ((curr - prev) / Math.abs(prev)) * 100;
+}
+
+function deltaHtml(delta, lowerIsBetter) {
+  if (delta === null) return '';
+  var abs = Math.abs(delta).toFixed(1);
+  var up = delta > 0;
+  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
+  return '<div class="metric-delta ' + (bad ? 'delta-bad' : 'delta-good') + '">' + (up ? '↑' : '↓') + ' ' + abs + '%</div>';
+}
+
+function buildAcDelta(delta, lowerIsBetter) {
+  if (delta === null) return '';
+  var abs = Math.abs(delta).toFixed(1);
+  var up = delta > 0;
+  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
+  return '<div class="ac-delta ' + (bad ? 'bad' : 'good') + '">' + (up ? '↑' : '↓') + abs + '%</div>';
+}
+
+function getPrevDateRange(preset) {
+  var days = preset === 'last_7d' ? 7 : preset === 'last_30d' ? 30 : 0;
+  if (!days) return null;
+  var now = new Date();
+  var end = new Date(now); end.setDate(end.getDate() - 1);
+  var start = new Date(end); start.setDate(start.getDate() - (days - 1));
+  var prevEnd = new Date(start); prevEnd.setDate(prevEnd.getDate() - 1);
+  var prevStart = new Date(prevEnd); prevStart.setDate(prevStart.getDate() - (days - 1));
+  return { since: fmtDate(prevStart), until: fmtDate(prevEnd) };
+}
+function fmtDate(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+
+function getPrevLabel(p) {
+  if (p === 'today') return 'vs ontem';
+  if (p === 'yesterday') return 'vs anteontem';
+  if (p === 'last_7d') return 'comparando com os 7 dias anteriores';
+  if (p === 'last_30d') return 'comparando com os 30 dias anteriores';
+  if (p === 'this_month') return 'vs mês passado';
+  if (p === 'last_month') return 'vs mês retrasado';
+  return 'vs período anterior';
+}
 
 function apiFetch(url) {
   return fetch(url).then(function(r) { return r.json(); }).then(function(d) {
@@ -443,383 +503,332 @@ function apiFetch(url) {
   });
 }
 
+var INSIGHT_FIELDS = 'spend,impressions,reach,clicks,ctr,cpc,cpm,frequency,actions,cost_per_action_type';
+
 function fetchInsights(id, preset) {
-  var url = BASE + '/' + id + '/insights?fields=spend,impressions,reach,clicks,ctr,cpc,actions,cost_per_action_type&date_preset=' + preset + '&access_token=' + META_TOKEN;
+  var url = BASE + '/' + id + '/insights?fields=' + INSIGHT_FIELDS + '&date_preset=' + preset + '&access_token=' + META_TOKEN;
   return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
 }
-
-function fetchInsightsByRange(id, since, until) {
-  var url = BASE + '/' + id + '/insights?fields=spend,impressions,reach,clicks,ctr,cpc,actions,cost_per_action_type&time_range={"since":"' + since + '","until":"' + until + '"}&access_token=' + META_TOKEN;
-  return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
-}
-
 function fetchPrevInsights(id, preset) {
   var range = getPrevDateRange(preset);
-  if (range) return fetchInsightsByRange(id, range.since, range.until);
-  // Para presets sem date range, usa preset mapeado
-  var prevPreset = PREV_PRESET_MAP[preset] || 'last_30d';
-  return fetchInsights(id, prevPreset);
+  if (range) {
+    var url = BASE + '/' + id + '/insights?fields=' + INSIGHT_FIELDS + '&time_range={"since":"' + range.since + '","until":"' + range.until + '"}&access_token=' + META_TOKEN;
+    return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
+  }
+  var prev = { today:'yesterday', this_month:'last_month' }[preset] || preset;
+  return fetchInsights(id, prev);
 }
 
 var STATUS_MAP = {
-  ACTIVE:      { label: 'Ativa',     cls: 'badge-green' },
-  PAUSED:      { label: 'Pausada',   cls: 'badge-yellow' },
-  DELETED:     { label: 'Removida',  cls: 'badge-red' },
-  ARCHIVED:    { label: 'Arquivada', cls: 'badge-gray' },
-  WITH_ISSUES: { label: 'Problema',  cls: 'badge-yellow' }
+  ACTIVE:{ label:'Ativa',cls:'badge-green' }, PAUSED:{ label:'Pausada',cls:'badge-yellow' },
+  DELETED:{ label:'Removida',cls:'badge-red' }, ARCHIVED:{ label:'Arquivada',cls:'badge-gray' },
+  WITH_ISSUES:{ label:'Problema',cls:'badge-yellow' }
 };
-function makeBadge(s) {
-  var m = STATUS_MAP[s] || STATUS_MAP.ARCHIVED;
-  return '<span class="badge ' + m.cls + '">' + m.label + '</span>';
-}
+function makeBadge(s) { var m = STATUS_MAP[s]||STATUS_MAP.ARCHIVED; return '<span class="badge '+m.cls+'">'+m.label+'</span>'; }
+function makeObjBadge(obj) { var c = getObjConfig(obj); return '<span class="obj-badge '+c.cls+'">'+c.icon+' '+c.label+'</span>'; }
 
 function updateTokenStatus() {
   $('token-dot').className = 'token-dot' + (META_TOKEN ? '' : ' missing');
   setText('token-status-label', META_TOKEN ? 'Token ativo' : 'Sem token');
 }
 
-// ══ THRESHOLD SLIDER ══════════════════════════════════════════════════════
+// ══ THRESHOLD ═════════════════════════════════════════════════════════════
 $('threshold-slider').oninput = function() {
   ALERT_THRESHOLD = parseInt(this.value);
   setText('threshold-val', ALERT_THRESHOLD + '%');
-  renderAccountGrid(ALL_ACCOUNTS);
+  if (ALL_ACCOUNTS.length) renderAccountGrid(ALL_ACCOUNTS);
 };
 
 // ══ LOGIN ═════════════════════════════════════════════════════════════════
 $('btn-login').onclick = doLogin;
-$('login-pass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+$('login-pass').addEventListener('keydown', function(e) { if (e.key==='Enter') doLogin(); });
 
 function doLogin() {
-  var userId = $('login-user').value;
-  var pass = $('login-pass').value;
+  var uid = $('login-user').value, pass = $('login-pass').value;
   showEl('login-error', false);
-  if (!userId) { showEl('login-error'); $('login-error').textContent = 'Selecione um usuário.'; return; }
-  var user = USERS[userId];
-  if (!user || pass !== user.pass) { showEl('login-error'); $('login-error').textContent = 'Senha incorreta.'; return; }
-
-  CURRENT_USER = userId;
-  META_TOKEN = loadToken(userId);
-  PRESET = 'last_30d';
-
-  hide('screen-login');
-  show('screen-accounts');
+  if (!uid) { showEl('login-error'); $('login-error').textContent='Selecione um usuário.'; return; }
+  var user = USERS[uid];
+  if (!user || pass !== user.pass) { showEl('login-error'); $('login-error').textContent='Senha incorreta.'; return; }
+  CURRENT_USER = uid; META_TOKEN = loadToken(uid); PRESET = 'last_30d';
+  hide('screen-login'); show('screen-accounts');
   setText('topbar-username', user.name);
   $('period-accounts').value = PRESET;
   updateTokenStatus();
-
-  if (!META_TOKEN) {
-    showEl('no-token-warn');
-    showEl('threshold-bar', false);
-  } else {
-    showEl('no-token-warn', false);
-    showEl('threshold-bar');
-    fetchAccounts();
-  }
+  if (!META_TOKEN) { showEl('no-token-warn'); showEl('threshold-bar',false); }
+  else { showEl('no-token-warn',false); showEl('threshold-bar'); fetchAccounts(); }
 }
 
 function doLogout() {
-  CURRENT_USER = null; META_TOKEN = ''; ACCOUNT = null; CAMPAIGNS = []; ALL_ACCOUNTS = [];
+  CURRENT_USER=null; META_TOKEN=''; ACCOUNT=null; CAMPAIGNS=[]; ALL_ACCOUNTS=[];
   ['screen-accounts','screen-detail'].forEach(hide);
-  show('screen-login');
-  $('login-pass').value = '';
+  show('screen-login'); $('login-pass').value='';
 }
-
 $('btn-logout').onclick = doLogout;
 $('btn-logout2').onclick = doLogout;
 
 // ══ TOKEN MODAL ════════════════════════════════════════════════════════════
-function openTokenModal() { $('modal-token-input').value = META_TOKEN || ''; showEl('modal-token-error', false); showEl('modal-token'); }
-function closeTokenModal() { showEl('modal-token', false); }
+function openTokenModal() { $('modal-token-input').value=META_TOKEN||''; showEl('modal-token-error',false); showEl('modal-token'); }
+function closeTokenModal() { showEl('modal-token',false); }
 $('token-status-btn').onclick = openTokenModal;
 $('btn-set-token-warn').onclick = openTokenModal;
 $('btn-modal-cancel').onclick = closeTokenModal;
-$('modal-token').onclick = function(e) { if (e.target === $('modal-token')) closeTokenModal(); };
-
+$('modal-token').onclick = function(e) { if (e.target===$('modal-token')) closeTokenModal(); };
 $('btn-modal-save').onclick = function() {
   var t = $('modal-token-input').value.trim();
-  if (!t) { showEl('modal-token-error'); $('modal-token-error').textContent = 'Cole o token antes de salvar.'; return; }
-  $('btn-modal-save').textContent = 'Verificando...';
-  $('btn-modal-save').disabled = true;
-  apiFetch(BASE + '/me?fields=id,name&access_token=' + t)
-    .then(function() {
-      META_TOKEN = t;
-      saveToken(CURRENT_USER, t);
-      updateTokenStatus();
-      closeTokenModal();
-      showEl('no-token-warn', false);
-      showEl('threshold-bar');
-      fetchAccounts();
-    })
-    .catch(function(e) { showEl('modal-token-error'); $('modal-token-error').textContent = e.message; })
-    .finally(function() { $('btn-modal-save').textContent = 'Salvar e conectar'; $('btn-modal-save').disabled = false; });
+  if (!t) { showEl('modal-token-error'); $('modal-token-error').textContent='Cole o token.'; return; }
+  $('btn-modal-save').textContent='Verificando...'; $('btn-modal-save').disabled=true;
+  apiFetch(BASE+'/me?fields=id,name&access_token='+t)
+    .then(function() { META_TOKEN=t; saveToken(CURRENT_USER,t); updateTokenStatus(); closeTokenModal(); showEl('no-token-warn',false); showEl('threshold-bar'); fetchAccounts(); })
+    .catch(function(e) { showEl('modal-token-error'); $('modal-token-error').textContent=e.message; })
+    .finally(function() { $('btn-modal-save').textContent='Salvar e conectar'; $('btn-modal-save').disabled=false; });
 };
 
 // ══ CONTAS ════════════════════════════════════════════════════════════════
-$('period-accounts').onchange = function(e) { PRESET = e.target.value; if (META_TOKEN) fetchAccounts(); };
+$('period-accounts').onchange = function(e) { PRESET=e.target.value; if (META_TOKEN) fetchAccounts(); };
 $('ac-search').addEventListener('input', function() { renderAccountGrid(ALL_ACCOUNTS); });
 
 function fetchAccounts() {
-  ALL_ACCOUNTS = [];
-  setText('ac-count-title', 'Carregando...');
-  $('ac-grid').innerHTML = '';
-  showEl('ac-error', false);
-  showEl('period-compare-label', false);
-
-  apiFetch(BASE + '/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token=' + META_TOKEN)
+  ALL_ACCOUNTS=[]; setText('ac-count-title','Carregando...'); $('ac-grid').innerHTML='';
+  showEl('ac-error',false); showEl('period-compare-label',false);
+  apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token='+META_TOKEN)
     .then(function(d) {
-      if (!d.data || d.data.length === 0) {
-        setText('ac-count-title', '0 contas');
-        showEl('ac-error');
-        $('ac-error').textContent = 'Nenhuma conta encontrada.';
-        return;
-      }
-      // Mostra label de comparação
-      var lbl = $('period-compare-label');
-      lbl.textContent = getPrevLabel(PRESET);
-      showEl('period-compare-label');
+      if (!d.data||!d.data.length) { setText('ac-count-title','0 contas'); showEl('ac-error'); $('ac-error').textContent='Nenhuma conta encontrada.'; return; }
+      setText('period-compare-label', getPrevLabel(PRESET)); showEl('period-compare-label');
       loadAccountsWithSpend(d.data);
     })
-    .catch(function(e) { setText('ac-count-title', '—'); showEl('ac-error'); $('ac-error').textContent = e.message; });
+    .catch(function(e) { setText('ac-count-title','—'); showEl('ac-error'); $('ac-error').textContent=e.message; });
 }
 
 function loadAccountsWithSpend(accounts) {
-  ALL_ACCOUNTS = [];
-  setText('ac-count-title', 'Verificando ' + accounts.length + ' contas...');
-  showEl('ac-progress');
-  $('progress-bar').style.width = '0%';
-  setText('progress-label', 'Aguarde...');
-
-  var total = accounts.length;
-  var done = 0;
-  var active = [];
-  var BATCH = 8;
-  var batches = [];
-  for (var i = 0; i < accounts.length; i += BATCH) batches.push(accounts.slice(i, i + BATCH));
+  ALL_ACCOUNTS=[]; setText('ac-count-title','Verificando '+accounts.length+' contas...');
+  showEl('ac-progress'); $('progress-bar').style.width='0%'; setText('progress-label','Aguarde...');
+  var total=accounts.length, done=0, active=[], BATCH=8, batches=[];
+  for (var i=0;i<accounts.length;i+=BATCH) batches.push(accounts.slice(i,i+BATCH));
 
   function runBatch(idx) {
-    if (idx >= batches.length) {
-      showEl('ac-progress', false);
-      ALL_ACCOUNTS = active.sort(function(a, b) { return parseFloat(b.insights.spend) - parseFloat(a.insights.spend); });
-      renderAccountGrid(ALL_ACCOUNTS);
-      return;
+    if (idx>=batches.length) {
+      showEl('ac-progress',false);
+      ALL_ACCOUNTS=active.sort(function(a,b) { return parseFloat(b.insights.spend)-parseFloat(a.insights.spend); });
+      renderAccountGrid(ALL_ACCOUNTS); return;
     }
     Promise.all(batches[idx].map(function(ac) {
-      // Busca período atual E anterior em paralelo
-      return Promise.all([
-        fetchInsights(ac.id, PRESET),
-        fetchPrevInsights(ac.id, PRESET)
-      ]).then(function(res) {
+      return Promise.all([fetchInsights(ac.id,PRESET), fetchPrevInsights(ac.id,PRESET)]).then(function(res) {
         done++;
-        var pct = Math.round((done / total) * 100);
-        $('progress-bar').style.width = pct + '%';
-        setText('progress-label', done + ' de ' + total);
-        var ins = res[0];
-        var prevIns = res[1];
-        if (ins && parseFloat(ins.spend || 0) > 0) {
-          active.push(Object.assign({}, ac, { insights: ins, prevInsights: prevIns }));
-          renderAccountGrid(active.sort(function(a, b) { return parseFloat(b.insights.spend) - parseFloat(a.insights.spend); }));
+        $('progress-bar').style.width=Math.round((done/total)*100)+'%';
+        setText('progress-label',done+' de '+total);
+        if (res[0]&&parseFloat(res[0].spend||0)>0) {
+          active.push(Object.assign({},ac,{insights:res[0],prevInsights:res[1]}));
+          renderAccountGrid(active.sort(function(a,b){return parseFloat(b.insights.spend)-parseFloat(a.insights.spend);}));
         }
-      }).catch(function() { done++; });
-    })).then(function() { runBatch(idx + 1); });
+      }).catch(function(){done++;});
+    })).then(function(){runBatch(idx+1);});
   }
   runBatch(0);
 }
 
 function renderAccountGrid(accounts) {
-  var search = ($('ac-search').value || '').toLowerCase();
-  var filtered = search ? accounts.filter(function(ac) { return ac.name.toLowerCase().indexOf(search) >= 0; }) : accounts;
-  var alertCount = 0;
-
-  $('ac-count-title').innerHTML = filtered.length + ' <span>conta' + (filtered.length !== 1 ? 's' : '') + ' ativas</span>';
-  var grid = $('ac-grid');
-  grid.innerHTML = '';
+  var search=($('ac-search').value||'').toLowerCase();
+  var filtered=search?accounts.filter(function(ac){return ac.name.toLowerCase().indexOf(search)>=0;}):accounts;
+  var alertCount=0;
+  $('ac-count-title').innerHTML=filtered.length+' <span>conta'+(filtered.length!==1?'s':'')+' ativas</span>';
+  var grid=$('ac-grid'); grid.innerHTML='';
 
   filtered.forEach(function(ac) {
-    var ins = ac.insights;
-    var prev = ac.prevInsights;
-    var leads = getLeads(ins.actions);
-    var cpl = getCPL(ins.cost_per_action_type);
-    var prevLeads = prev ? getLeads(prev.actions) : null;
-    var prevCpl = prev ? getCPL(prev.cost_per_action_type) : null;
-    var prevSpend = prev ? parseFloat(prev.spend || 0) : null;
-    var currSpend = parseFloat(ins.spend || 0);
+    var ins=ac.insights, prev=ac.prevInsights;
+    var currSpend=parseFloat(ins.spend||0);
+    var prevSpend=prev?parseFloat(prev.spend||0):null;
+    var deltaSpend=calcDelta(currSpend,prevSpend);
 
-    var deltaCpl = calcDelta(cpl, prevCpl);
-    var deltaSpend = calcDelta(currSpend, prevSpend);
-    var deltaLeads = calcDelta(leads, prevLeads);
+    // Determina tipo dominante das campanhas (usamos dados gerais da conta)
+    // Para o card, usa leads como padrão mas mostra métricas reais disponíveis
+    var leads=getLeads(ins.actions);
+    var cpl=getCPL(ins.cost_per_action_type);
+    var prevLeads=prev?getLeads(prev.actions):null;
+    var prevCpl=prev?getCPL(prev.cost_per_action_type):null;
+    var deltaCpl=calcDelta(cpl,prevCpl);
+    var deltaLeads=calcDelta(leads,prevLeads);
 
-    // Verifica alertas
-    var alerts = [];
-    if (deltaCpl !== null && deltaCpl > ALERT_THRESHOLD) alerts.push('CPL subiu ' + deltaCpl.toFixed(1) + '%');
-    if (deltaSpend !== null && deltaSpend > ALERT_THRESHOLD) alerts.push('Investimento subiu ' + deltaSpend.toFixed(1) + '%');
+    // CTR como fallback universal
+    var deltaCtr=calcDelta(parseFloat(ins.ctr||0),prev?parseFloat(prev.ctr||0):null);
+
+    // Alertas: CPL piorou OU investimento piorou
+    var alerts=[];
+    if (deltaCpl!==null&&deltaCpl>ALERT_THRESHOLD) alerts.push('CPL +'+deltaCpl.toFixed(1)+'%');
+    if (deltaSpend!==null&&deltaSpend>ALERT_THRESHOLD) alerts.push('Investimento +'+deltaSpend.toFixed(1)+'%');
     if (alerts.length) alertCount++;
 
-    var card = document.createElement('div');
-    card.className = 'ac-card' + (alerts.length ? ' has-alert' : '');
+    var card=document.createElement('div');
+    card.className='ac-card'+(alerts.length?' has-alert':'');
 
-    var alertBadge = alerts.length ? '<div class="alert-badge">⚠</div>' : '';
+    var kpiBlock = '';
+    if (leads !== null) {
+      kpiBlock =
+        '<div class="ac-card-row">' +
+          '<div class="ac-card-kpi">Leads: <span>'+leads+'</span></div>' +
+          buildAcDelta(deltaLeads,false) +
+        '</div>' +
+        '<div class="ac-card-row">' +
+          '<div class="ac-card-kpi">CPL: <span>'+(cpl!==null?fmt(cpl,'currency',ac.currency):'—')+'</span></div>' +
+          buildAcDelta(deltaCpl,true) +
+        '</div>';
+    } else {
+      // Conta sem leads: mostra CTR e cliques
+      kpiBlock =
+        '<div class="ac-card-row">' +
+          '<div class="ac-card-kpi">CTR: <span>'+fmt(ins.ctr,'pct')+'</span></div>' +
+          buildAcDelta(deltaCtr,false) +
+        '</div>' +
+        '<div class="ac-card-row">' +
+          '<div class="ac-card-kpi">Cliques: <span>'+fmt(ins.clicks,'int')+'</span></div>' +
+        '</div>';
+    }
 
-    // Deltas inline
-    var spendDeltaHtml = deltaSpend !== null ? buildAcDelta(deltaSpend, true) : '';
-    var cplDeltaHtml   = deltaCpl   !== null ? buildAcDelta(deltaCpl, true)   : '';
-    var leadsDeltaHtml = deltaLeads !== null ? buildAcDelta(deltaLeads, false) : '';
+    card.innerHTML=
+      (alerts.length?'<div class="alert-badge">⚠</div>':'')+
+      '<div class="ac-card-name" title="'+ac.name+'">'+ac.name+'</div>'+
+      '<div class="ac-card-row">'+
+        '<div class="ac-card-spend">'+fmt(ins.spend,'currency',ac.currency)+'</div>'+
+        buildAcDelta(deltaSpend,true)+
+      '</div>'+
+      kpiBlock+
+      '<div class="ac-card-sub"><span>'+(ac.currency||'BRL')+'</span><span>Alcance '+fmt(ins.reach,'int')+'</span></div>'+
+      (alerts.length?'<div class="alert-strip">⚠ '+alerts.join(' · ')+'</div>':'');
 
-    var alertStrip = alerts.length ? '<div class="alert-strip">⚠ ' + alerts.join(' · ') + '</div>' : '';
-
-    card.innerHTML =
-      alertBadge +
-      '<div class="ac-card-name" title="' + ac.name + '">' + ac.name + '</div>' +
-      '<div class="ac-card-row">' +
-        '<div class="ac-card-spend">' + fmt(ins.spend, 'currency', ac.currency) + '</div>' +
-        spendDeltaHtml +
-      '</div>' +
-      '<div class="ac-card-row">' +
-        '<div class="ac-card-leads">Leads: <span>' + (leads !== null ? leads : '—') + '</span>' + (leadsDeltaHtml ? ' ' + leadsDeltaHtml : '') + '</div>' +
-      '</div>' +
-      '<div class="ac-card-row" style="margin-top:2px">' +
-        '<div class="ac-card-leads">CPL: <span>' + (cpl !== null ? fmt(cpl, 'currency', ac.currency) : '—') + '</span></div>' +
-        cplDeltaHtml +
-      '</div>' +
-      '<div class="ac-card-sub"><span>' + (ac.currency || 'BRL') + '</span><span>CTR ' + fmt(ins.ctr, 'pct') + '</span></div>' +
-      alertStrip;
-
-    card.onclick = function() { openAccount(ac); };
-    grid.appendChild(card);
+    card.onclick=function(){openAccount(ac);}; grid.appendChild(card);
   });
 
-  // Resumo de alertas no título
-  if (alertCount > 0) {
-    $('ac-count-title').innerHTML += ' <span style="color:var(--orange);font-size:13px">· ' + alertCount + ' alerta' + (alertCount > 1 ? 's' : '') + '</span>';
+  if (alertCount>0) {
+    $('ac-count-title').innerHTML+=' <span style="color:var(--orange);font-size:13px">· '+alertCount+' alerta'+(alertCount>1?'s':'')+'</span>';
   }
 }
 
-function buildAcDelta(delta, lowerIsBetter) {
-  if (delta === null) return '';
-  var abs = Math.abs(delta).toFixed(1);
-  var up = delta > 0;
-  var bad = (up && lowerIsBetter) || (!up && !lowerIsBetter);
-  var arrow = up ? '↑' : '↓';
-  var cls = bad ? 'bad' : 'good';
-  return '<div class="ac-delta ' + cls + '">' + arrow + abs + '%</div>';
-}
-
 // ══ DETALHE ═══════════════════════════════════════════════════════════════
-$('btn-back').onclick = function() { hide('screen-detail'); show('screen-accounts'); };
-$('period-detail').onchange = function(e) { PRESET = e.target.value; if (ACCOUNT) loadDetail(ACCOUNT); };
+$('btn-back').onclick=function(){hide('screen-detail');show('screen-accounts');};
+$('period-detail').onchange=function(e){PRESET=e.target.value;if(ACCOUNT)loadDetail(ACCOUNT);};
 
 function openAccount(ac) {
-  ACCOUNT = ac;
-  PRESET = $('period-accounts').value;
-  hide('screen-accounts');
-  show('screen-detail');
-  $('period-detail').value = PRESET;
-  setText('detail-title', ac.name);
-  loadDetail(ac);
+  ACCOUNT=ac; PRESET=$('period-accounts').value;
+  hide('screen-accounts'); show('screen-detail');
+  $('period-detail').value=PRESET; setText('detail-title',ac.name); loadDetail(ac);
 }
 
 function loadDetail(ac) {
-  showEl('detail-loading');
-  showEl('detail-error', false);
-  $('camp-tbody').innerHTML = '<tr><td colspan="9" class="empty">Carregando...</td></tr>';
-  $('camp-tfoot').innerHTML = '';
-  showEl('detail-compare-label', false);
-  renderMetrics(null, null, ac.currency);
+  showEl('detail-loading'); showEl('detail-error',false); showEl('detail-compare-label',false);
+  $('camp-groups').innerHTML='<div class="empty">Carregando...</div>';
+  renderMetrics(null,null,ac.currency);
 
   Promise.all([
-    fetchInsights(ac.id, PRESET),
-    fetchPrevInsights(ac.id, PRESET),
-    apiFetch(BASE + '/' + ac.id + '/campaigns?fields=name,status,objective&limit=100&access_token=' + META_TOKEN)
+    fetchInsights(ac.id,PRESET),
+    fetchPrevInsights(ac.id,PRESET),
+    apiFetch(BASE+'/'+ac.id+'/campaigns?fields=name,status,objective&limit=100&access_token='+META_TOKEN)
   ]).then(function(res) {
-    var ins = res[0], prevIns = res[1];
-    renderMetrics(ins, prevIns, ac.currency || 'BRL');
-    // Label de comparação
-    setText('detail-compare-label', getPrevLabel(PRESET));
-    showEl('detail-compare-label');
-    var camps = res[2].data || [];
+    renderMetrics(res[0],res[1],ac.currency||'BRL');
+    setText('detail-compare-label',getPrevLabel(PRESET)); showEl('detail-compare-label');
+    var camps=res[2].data||[];
     return Promise.all(camps.map(function(c) {
-      return fetchInsights(c.id, PRESET).then(function(ci) { return Object.assign({}, c, { insights: ci }); });
+      return fetchInsights(c.id,PRESET).then(function(ci){return Object.assign({},c,{insights:ci});});
     }));
   }).then(function(list) {
-    CAMPAIGNS = list;
-    renderCampaigns();
+    CAMPAIGNS=list; renderCampaigns();
   }).catch(function(e) {
-    $('detail-error').textContent = e.message;
-    showEl('detail-error');
-    $('camp-tbody').innerHTML = '';
-  }).finally(function() { showEl('detail-loading', false); });
+    $('detail-error').textContent=e.message; showEl('detail-error'); $('camp-groups').innerHTML='';
+  }).finally(function(){showEl('detail-loading',false);});
 }
 
 function renderMetrics(ins, prev, currency) {
-  currency = currency || 'BRL';
-  var leads    = ins  ? getLeads(ins.actions)  : null;
-  var cpl      = ins  ? getCPL(ins.cost_per_action_type)  : null;
-  var prevLeads = prev ? getLeads(prev.actions) : null;
-  var prevCpl   = prev ? getCPL(prev.cost_per_action_type) : null;
-  var L = !ins;
-
-  var items = [
-    { label: 'Investimento', val: L ? '...' : fmt(ins.spend,'currency',currency), delta: calcDelta(ins && parseFloat(ins.spend), prev && parseFloat(prev.spend)), low: true },
-    { label: 'Leads',        val: L ? '...' : (leads !== null ? fmt(leads,'int') : '—'), delta: calcDelta(leads, prevLeads), low: false },
-    { label: 'CPL',          val: L ? '...' : (cpl !== null ? fmt(cpl,'currency',currency) : '—'), delta: calcDelta(cpl, prevCpl), low: true },
-    { label: 'CTR',          val: L ? '...' : fmt(ins && ins.ctr,'pct'), delta: calcDelta(ins && parseFloat(ins.ctr), prev && parseFloat(prev.ctr)), low: false },
-    { label: 'CPC',          val: L ? '...' : fmt(ins && ins.cpc,'currency',currency), delta: calcDelta(ins && parseFloat(ins.cpc), prev && parseFloat(prev.cpc)), low: true },
-    { label: 'Alcance',      val: L ? '...' : fmt(ins && ins.reach,'int'), delta: calcDelta(ins && parseFloat(ins.reach), prev && parseFloat(prev.reach)), low: false },
-    { label: 'Impressões',   val: L ? '...' : fmt(ins && ins.impressions,'int'), delta: calcDelta(ins && parseFloat(ins.impressions), prev && parseFloat(prev.impressions)), low: false }
+  currency=currency||'BRL';
+  var leads=ins?getLeads(ins.actions):null;
+  var cpl=ins?getCPL(ins.cost_per_action_type):null;
+  var prevLeads=prev?getLeads(prev.actions):null;
+  var prevCpl=prev?getCPL(prev.cost_per_action_type):null;
+  var L=!ins;
+  var items=[
+    {label:'Investimento',val:L?'...':fmt(ins.spend,'currency',currency),delta:calcDelta(ins&&parseFloat(ins.spend),prev&&parseFloat(prev.spend)),low:true},
+    {label:'Leads',val:L?'...':(leads!==null?fmt(leads,'int'):'—'),delta:calcDelta(leads,prevLeads),low:false},
+    {label:'CPL',val:L?'...':(cpl!==null?fmt(cpl,'currency',currency):'—'),delta:calcDelta(cpl,prevCpl),low:true},
+    {label:'Cliques',val:L?'...':fmt(ins&&ins.clicks,'int'),delta:calcDelta(ins&&parseFloat(ins.clicks),prev&&parseFloat(prev.clicks)),low:false},
+    {label:'CTR',val:L?'...':fmt(ins&&ins.ctr,'pct'),delta:calcDelta(ins&&parseFloat(ins.ctr),prev&&parseFloat(prev.ctr)),low:false},
+    {label:'CPM',val:L?'...':fmt(ins&&ins.cpm,'currency',currency),delta:calcDelta(ins&&parseFloat(ins.cpm),prev&&parseFloat(prev.cpm)),low:true},
+    {label:'Alcance',val:L?'...':fmt(ins&&ins.reach,'int'),delta:calcDelta(ins&&parseFloat(ins.reach),prev&&parseFloat(prev.reach)),low:false},
+    {label:'Impressões',val:L?'...':fmt(ins&&ins.impressions,'int'),delta:calcDelta(ins&&parseFloat(ins.impressions),prev&&parseFloat(prev.impressions)),low:false},
   ];
-
-  $('metric-grid').innerHTML = items.map(function(x) {
-    return '<div class="metric-card">' +
-      '<div class="metric-label">' + x.label + '</div>' +
-      '<div class="metric-value">' + x.val + '</div>' +
-      (!L && x.delta !== null ? deltaHtml(x.delta, x.low) : '') +
-      '</div>';
+  $('metric-grid').innerHTML=items.map(function(x){
+    return '<div class="metric-card"><div class="metric-label">'+x.label+'</div><div class="metric-value">'+x.val+'</div>'+
+      (!L&&x.delta!==null?deltaHtml(x.delta,x.low):'')+
+    '</div>';
   }).join('');
 }
 
 document.querySelectorAll('.filter-btn').forEach(function(btn) {
-  btn.onclick = function() {
-    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    STATUS_FILTER = btn.dataset.status;
-    renderCampaigns();
+  btn.onclick=function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active'); STATUS_FILTER=btn.dataset.status; renderCampaigns();
   };
 });
 
 function renderCampaigns() {
-  var filtered = STATUS_FILTER === 'ALL' ? CAMPAIGNS : CAMPAIGNS.filter(function(c) { return c.status === STATUS_FILTER; });
-  var currency = ACCOUNT && ACCOUNT.currency ? ACCOUNT.currency : 'BRL';
-  setText('camp-count', filtered.length + ' campanha' + (filtered.length !== 1 ? 's' : ''));
-  if (!filtered.length) {
-    $('camp-tbody').innerHTML = '<tr><td colspan="9" class="empty">Nenhuma campanha para este filtro.</td></tr>';
-    $('camp-tfoot').innerHTML = '';
-    return;
-  }
-  $('camp-tbody').innerHTML = filtered.map(function(c) {
-    var ci = c.insights;
-    var cl = ci ? getLeads(ci.actions) : null;
-    var cc = ci ? getCPL(ci.cost_per_action_type) : null;
-    return '<tr>' +
-      '<td class="td-name" title="' + c.name + '">' + c.name + '</td>' +
-      '<td>' + makeBadge(c.status) + '</td>' +
-      '<td class="r">' + (ci ? fmt(ci.spend,'currency',currency) : '—') + '</td>' +
-      '<td class="r">' + (cl !== null ? fmt(cl,'int') : '—') + '</td>' +
-      '<td class="r">' + (cc !== null ? fmt(cc,'currency',currency) : '—') + '</td>' +
-      '<td class="r">' + (ci ? fmt(ci.ctr,'pct') : '—') + '</td>' +
-      '<td class="r">' + (ci ? fmt(ci.cpc,'currency',currency) : '—') + '</td>' +
-      '<td class="r">' + (ci ? fmt(ci.reach,'int') : '—') + '</td>' +
-      '<td class="r">' + (ci ? fmt(ci.impressions,'int') : '—') + '</td>' +
-      '</tr>';
-  }).join('');
-  if (filtered.length > 1) {
-    var ts = filtered.reduce(function(s,c) { return s + (c.insights ? parseFloat(c.insights.spend||0) : 0); }, 0);
-    var tl = filtered.reduce(function(s,c) { return s + (c.insights ? (getLeads(c.insights.actions)||0) : 0); }, 0);
-    $('camp-tfoot').innerHTML = '<tr>' +
-      '<td style="color:var(--muted)">Total</td><td></td>' +
-      '<td class="r" style="color:var(--text)">' + fmt(ts,'currency',currency) + '</td>' +
-      '<td class="r" style="color:var(--text)">' + fmt(tl,'int') + '</td>' +
-      '<td class="r" style="color:var(--text)">' + (tl > 0 ? fmt(ts/tl,'currency',currency) : '—') + '</td>' +
-      '<td colspan="4"></td></tr>';
-  }
+  var filtered=STATUS_FILTER==='ALL'?CAMPAIGNS:CAMPAIGNS.filter(function(c){return c.status===STATUS_FILTER;});
+  var currency=ACCOUNT&&ACCOUNT.currency?ACCOUNT.currency:'BRL';
+  setText('camp-count',filtered.length+' campanha'+(filtered.length!==1?'s':''));
+
+  if (!filtered.length) { $('camp-groups').innerHTML='<div class="empty">Nenhuma campanha para este filtro.</div>'; return; }
+
+  // Agrupa por tipo de objetivo
+  var groups = {};
+  filtered.forEach(function(c) {
+    var cfg = getObjConfig(c.objective);
+    var type = cfg.type;
+    if (!groups[type]) groups[type] = { cfg: cfg, camps: [] };
+    groups[type].camps.push(c);
+  });
+
+  var order = ['leads','traffic','awareness','engagement','other'];
+  var html = '';
+
+  order.forEach(function(type) {
+    var g = groups[type];
+    if (!g) return;
+    var cols = OBJ_COLS[type] || OBJ_COLS.other;
+    var camps = g.camps;
+
+    var totalSpend = camps.reduce(function(s,c){return s+(c.insights?parseFloat(c.insights.spend||0):0);},0);
+
+    html += '<div class="camp-group">';
+    html += '<div class="camp-group-header">' +
+      '<span class="obj-badge '+g.cfg.cls+'">'+g.cfg.icon+' '+g.cfg.label+'</span>' +
+      '<span class="camp-group-count">'+camps.length+' campanha'+(camps.length!==1?'s':'')+' · '+fmt(totalSpend,'currency',currency)+'</span>' +
+    '</div>';
+    html += '<div class="table-wrap"><table><thead><tr>' +
+      '<th>Campanha</th><th>Status</th><th class="r">Investimento</th>';
+    cols.forEach(function(col){html+='<th class="r">'+col.label+'</th>';});
+    html += '</tr></thead><tbody>';
+
+    camps.forEach(function(c) {
+      var ci=c.insights;
+      html+='<tr><td class="td-name" title="'+c.name+'">'+c.name+'</td>';
+      html+='<td>'+makeBadge(c.status)+'</td>';
+      html+='<td class="r">'+(ci?fmt(ci.spend,'currency',currency):'—')+'</td>';
+      cols.forEach(function(col){html+='<td class="r">'+(ci?col.fn(ci):'—')+'</td>';});
+      html+='</tr>';
+    });
+
+    // Total do grupo
+    if (camps.length>1) {
+      var tl=camps.reduce(function(s,c){return s+(c.insights?(getLeads(c.insights.actions)||0):0);},0);
+      html+='</tbody><tfoot><tr><td style="color:var(--muted)">Total</td><td></td>';
+      html+='<td class="r" style="color:var(--text)">'+fmt(totalSpend,'currency',currency)+'</td>';
+      cols.forEach(function(col,i){
+        if(i===0&&type==='leads') html+='<td class="r" style="color:var(--text)">'+fmt(tl,'int')+'</td>';
+        else if(i===1&&type==='leads') html+='<td class="r" style="color:var(--text)">'+(tl>0?fmt(totalSpend/tl,'currency',currency):'—')+'</td>';
+        else html+='<td></td>';
+      });
+      html+='</tr></tfoot>';
+    } else { html+='</tbody>'; }
+
+    html+='</table></div></div>';
+  });
+
+  $('camp-groups').innerHTML=html;
 }
 </script>
 </body>
