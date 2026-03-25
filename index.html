@@ -326,6 +326,7 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
       <div class="dtabs">
         <button class="dtab active" id="tabCamp" onclick="switchTab('camp')">Campanhas</button>
         <button class="dtab" id="tabConj" onclick="switchTab('conj')">Conjuntos de anúncios</button>
+        <button class="dtab" id="tabRel" onclick="switchTab('rel')">Relatório</button>
       </div>
       <div id="tcCamp">
         <div class="sec-hdr" style="margin-bottom:14px">
@@ -355,6 +356,22 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
         </table></div>
       </div>
     </div>
+
+    <!-- RELATÓRIO -->
+    <div id="tcRelatorio" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <p style="font-size:11px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px">Período do relatório</p>
+          <p style="font-size:13px;color:var(--t2)" id="rptPeriodo">—</p>
+        </div>
+        <button class="btn btn-accent" onclick="printReport()" style="display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5V2h8v3M3 10H1V6h12v4h-2M3 8h8v4H3V8z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+          Baixar PDF
+        </button>
+      </div>
+      <div id="rptContent"></div>
+    </div>
+
   </main>
 </div>
 
@@ -847,6 +864,7 @@ function loadDetail(ac){
     apiFetch(BASE+'/'+ac.id+'/campaigns?fields=name,status,objective&limit=100&access_token='+TOKEN)
   ]).then(function(r){
     renderMetrics(r[0],r[1],ac.currency||'BRL');
+    ACCOUNT._lastIns=r[0]; ACCOUNT._lastPrev=r[1];
     setText('detComp',prevLabel(PRESET));show('detComp');
     var camps=r[2].data||[];
     return Promise.all(camps.map(function(c){return fetchIns(c.id,PRESET).then(function(ci){return Object.assign({},c,{ins:ci})})}));
@@ -930,9 +948,12 @@ function renderCamps(){
 function switchTab(tab){
   $('tcCamp').style.display=tab==='camp'?'':'none';
   $('tcConj').style.display=tab==='conj'?'':'none';
+  $('tcRelatorio').style.display=tab==='rel'?'':'none';
   $('tabCamp').className='dtab'+(tab==='camp'?' active':'');
   $('tabConj').className='dtab'+(tab==='conj'?' active':'');
+  $('tabRel') && ($('tabRel').className='dtab'+(tab==='rel'?' active':''));
   if(tab==='conj'&&!ADSETS_LOADED&&ACCOUNT)loadAdsets(ACCOUNT);
+  if(tab==='rel'&&ACCOUNT)renderReport();
 }
 document.querySelectorAll('#conjFilters .fb').forEach(function(b){
   b.onclick=function(){
@@ -1096,6 +1117,153 @@ document.addEventListener('click',function(e){
   if(e.target.closest('.pp-drop')||e.target.closest('.pp-wrap'))return;
   closePP();
 });
+// ══ RELATÓRIO ════════════════════════════════════════════════════════════
+function printReport() { window.print(); }
+
+function renderReport() {
+  if (!ACCOUNT || !CAMPAIGNS) return;
+  var cur = ACCOUNT.currency || 'BRL';
+  var ins  = ACCOUNT._lastIns  || null;
+  var prev = ACCOUNT._lastPrev || null;
+
+  // Label de período
+  var today = new Date();
+  var periodoLabel = '';
+  if (PRESET === 'custom' && PP.since && PP.until) {
+    periodoLabel = PP.since.split('-').reverse().join('/') + ' a ' + PP.until.split('-').reverse().join('/');
+  } else {
+    var presetLabels = {today:'Hoje',yesterday:'Ontem',last_7d:'Últimos 7 dias',last_30d:'Últimos 30 dias',this_month:'Este mês',last_month:'Mês passado'};
+    periodoLabel = presetLabels[PRESET] || PRESET;
+  }
+  setText('rptPeriodo', periodoLabel);
+
+  if (!ins) {
+    $('rptContent').innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3)">Carregue os dados da conta primeiro na aba Campanhas.</div>';
+    return;
+  }
+
+  var clientName = getDisplayName(ACCOUNT.name);
+  var res = getResult(ins);
+  var prevRes = prev ? getResult(prev) : null;
+
+  function delt(curr, prev, low) {
+    if (curr === null || prev === null || !prev) return '';
+    var pct = ((curr - prev) / Math.abs(prev)) * 100;
+    var good = (pct < 0 && low) || (pct > 0 && !low);
+    var cls = good ? 'rpt-pos' : 'rpt-neg';
+    return '<span class="'+cls+'" style="font-size:11px;font-weight:500">'+(pct>0?'▲':'▼')+' '+Math.abs(pct).toFixed(2)+'%</span>';
+  }
+  function deltVal(curr, prev) { return curr && prev ? ((curr-prev)/Math.abs(prev)*100).toFixed(2) : null; }
+  function fmtR(v, t) { return fmt(v, t, cur); }
+
+  var leads = getLeads(ins.actions);
+  var cpl   = getCPL(ins.cost_per_action_type);
+  var prevLeads = prev ? getLeads(prev.actions) : null;
+  var prevCpl   = prev ? getCPL(prev.cost_per_action_type) : null;
+  var convWA = null, costWA = null;
+  if (ins.actions) {
+    var waTypes = ['onsite_conversion.messaging_conversation_started_7d','fb_messaging_conversation_started_7d'];
+    for (var i=0; i<waTypes.length; i++) {
+      var wa = ins.actions.find(function(a){return a.action_type===waTypes[i]});
+      if (wa) { convWA = parseInt(wa.value); break; }
+    }
+  }
+  if (ins.cost_per_action_type && convWA) {
+    var waTypes2 = ['onsite_conversion.messaging_conversation_started_7d','fb_messaging_conversation_started_7d'];
+    for (var i=0; i<waTypes2.length; i++) {
+      var wac = ins.cost_per_action_type.find(function(a){return a.action_type===waTypes2[i]});
+      if (wac) { costWA = parseFloat(wac.value); break; }
+    }
+  }
+  var prevConvWA = null;
+  if (prev && prev.actions) {
+    var waTypes3 = ['onsite_conversion.messaging_conversation_started_7d','fb_messaging_conversation_started_7d'];
+    for (var i=0; i<waTypes3.length; i++) {
+      var wa3 = prev.actions.find(function(a){return a.action_type===waTypes3[i]});
+      if (wa3) { prevConvWA = parseInt(wa3.value); break; }
+    }
+  }
+
+  var metrics = [
+    { l:'Valor investido',       v:fmtR(ins.spend,'cur'),       prev:prev?fmtR(prev.spend,'cur'):null,       d:delt(parseFloat(ins.spend||0),prev?parseFloat(prev.spend||0):null,true) },
+    { l:'CTR (cliques no link)', v:fmtR(ins.ctr,'pct'),          prev:prev?fmtR(prev.ctr,'pct'):null,          d:delt(parseFloat(ins.ctr||0),prev?parseFloat(prev.ctr||0):null,false) },
+    { l:'CPC médio',             v:fmtR(ins.cpc,'cur'),          prev:prev?fmtR(prev.cpc,'cur'):null,          d:delt(parseFloat(ins.cpc||0),prev?parseFloat(prev.cpc||0):null,true) },
+    { l:'CPM médio',             v:fmtR(ins.cpm,'cur'),          prev:prev?fmtR(prev.cpm,'cur'):null,          d:delt(parseFloat(ins.cpm||0),prev?parseFloat(prev.cpm||0):null,true) },
+    { l:'Impressões totais',     v:fmtR(ins.impressions,'int'),  prev:prev?fmtR(prev.impressions,'int'):null,  d:delt(parseFloat(ins.impressions||0),prev?parseFloat(prev.impressions||0):null,false) },
+    { l:'Alcance total',         v:fmtR(ins.reach,'int'),        prev:prev?fmtR(prev.reach,'int'):null,        d:delt(parseFloat(ins.reach||0),prev?parseFloat(prev.reach||0):null,false) },
+    { l:'Total de cliques',      v:fmtR(ins.clicks,'int'),       prev:prev?fmtR(prev.clicks,'int'):null,       d:delt(parseFloat(ins.clicks||0),prev?parseFloat(prev.clicks||0):null,false) },
+    { l:'Frequência',            v:ins.frequency?parseFloat(ins.frequency).toFixed(2):'—', prev:prev&&prev.frequency?parseFloat(prev.frequency).toFixed(2):null, d:delt(parseFloat(ins.frequency||0),prev?parseFloat(prev.frequency||0):null,true) },
+  ];
+  if (convWA !== null) metrics.push({ l:'Conversas iniciadas (WA)', v:fmtR(convWA,'int'), prev:prevConvWA!==null?fmtR(prevConvWA,'int'):null, d:delt(convWA,prevConvWA,false) });
+  if (convWA !== null && costWA !== null) metrics.push({ l:'Custo por conversa (WA)', v:fmtR(costWA,'cur'), prev:null, d:'' });
+  if (leads !== null) metrics.push({ l:'Leads gerados', v:fmtR(leads,'int'), prev:prevLeads!==null?fmtR(prevLeads,'int'):null, d:delt(leads,prevLeads,false) });
+  if (cpl !== null) metrics.push({ l:'CPL', v:fmtR(cpl,'cur'), prev:prevCpl!==null?fmtR(prevCpl,'cur'):null, d:delt(cpl,prevCpl,true) });
+
+  // Campanhas com gasto
+  var camps = CAMPAIGNS.filter(function(c){ return c.ins && parseFloat(c.ins.spend||0) > 0 });
+
+  var html2 = '';
+
+  // HEADER
+  html2 += '<div style="text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--b2)">' +
+    '<div style="font-size:22px;font-weight:600;color:var(--t1);margin-bottom:4px">'+clientName+'</div>' +
+    '<div style="font-size:13px;color:var(--t3)">Relatório de desempenho · '+periodoLabel+'</div>' +
+    (prev ? '<div style="font-size:11px;color:var(--t3);margin-top:4px">Comparado com período anterior</div>' : '') +
+    '</div>';
+
+  // MÉTRICAS GRID
+  html2 += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:28px">';
+  metrics.forEach(function(m) {
+    html2 += '<div class="rpt-metric" style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px">' +
+      '<div style="font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">'+m.l+'</div>' +
+      '<div class="rpt-val" style="font-size:22px;font-weight:300;font-family:monospace;color:var(--t1);letter-spacing:-.02em">'+m.v+'</div>' +
+      (m.d ? '<div style="margin-top:5px;display:flex;align-items:center;gap:5px">'+m.d+(m.prev?'<span style="font-size:10px;color:var(--t3)">'+m.prev+' anterior</span>':'')+'</div>' : '') +
+      '</div>';
+  });
+  html2 += '</div>';
+
+  // CAMPANHAS EM DESTAQUE
+  if (camps.length > 0) {
+    html2 += '<div style="margin-bottom:28px">' +
+      '<h3 style="font-size:14px;font-weight:500;color:var(--t1);margin-bottom:12px">Campanhas em destaque</h3>' +
+      '<div style="overflow-x:auto;border:1px solid var(--b1);border-radius:var(--r12)">' +
+      '<table class="rpt-tbl" style="width:100%;border-collapse:collapse;min-width:600px">' +
+      '<thead><tr style="background:var(--s2);border-bottom:1px solid var(--b1)">' +
+      '<th style="padding:10px 12px;text-align:left;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Campanha</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Resultado</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Custo/Res.</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Investido</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">CTR</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">CPM</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Alcance</th>' +
+      '<th style="padding:10px 12px;text-align:right;font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500">Freq.</th>' +
+      '</tr></thead><tbody>';
+    camps.forEach(function(c, idx) {
+      var ci = c.ins;
+      var r = getResult(ci);
+      var bg = idx % 2 === 0 ? 'background:var(--s1)' : 'background:var(--bg)';
+      html2 += '<tr style="'+bg+';border-bottom:1px solid var(--b1)">' +
+        '<td style="padding:10px 12px;font-size:12px;color:var(--t1);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+c.name+'">'+c.name+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;font-weight:500;color:var(--t1)">'+(r?fmt(r.value,'int',cur)+' <span style="font-size:10px;color:var(--t3)">'+r.label+'</span>':'—')+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;font-family:monospace;color:var(--t1)">'+(r&&r.cost!==null?fmt(r.cost,'cur',cur):'—')+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;font-family:monospace;color:var(--t1)">'+fmt(ci.spend,'cur',cur)+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;color:var(--t2)">'+fmt(ci.ctr,'pct')+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;color:var(--t2)">'+fmt(ci.cpm,'cur',cur)+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;color:var(--t2)">'+fmt(ci.reach,'int')+'</td>' +
+        '<td style="padding:10px 12px;text-align:right;font-size:12px;color:var(--t2)">'+(ci.frequency?parseFloat(ci.frequency).toFixed(2):'—')+'</td>' +
+        '</tr>';
+    });
+    html2 += '</tbody></table></div></div>';
+  }
+
+  // RODAPÉ
+  html2 += '<div style="text-align:center;padding-top:20px;border-top:1px solid var(--b1);margin-top:8px">' +
+    '<div style="font-size:11px;color:var(--t3)">Gerado em ' + new Date().toLocaleDateString('pt-BR') + ' · Mínimo Marketing · Meta Ads Dashboard</div>' +
+    '</div>';
+
+  $('rptContent').innerHTML = html2;
+}
+
 </script>
 </body>
 </html>
