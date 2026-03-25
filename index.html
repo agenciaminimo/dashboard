@@ -1706,6 +1706,14 @@ function renderCampaigns() {
 
 // ══ NAVEGAÇÃO COM SIDEBAR ════════════════════════════════════════════════
 
+// Bind correto do login
+document.addEventListener('DOMContentLoaded', function() {
+  var btnLogin = document.getElementById('btn-login');
+  if (btnLogin) btnLogin.onclick = doLoginNew;
+  var passInput = document.getElementById('login-pass');
+  if (passInput) passInput.addEventListener('keydown', function(e){ if(e.key==='Enter') doLoginNew(); });
+});
+
 function navTo(view) {
   // Esconde todas as views
   ['saldos','clientes','detail'].forEach(function(v) {
@@ -1760,10 +1768,7 @@ openAccount = function(ac) {
 function goToContas() { navTo('clientes'); }
 function goToSaldos() { navTo('saldos'); }
 
-// Override doLogin para novo layout
-$('btn-login').onclick = null;
-document.getElementById('btn-login').onclick = doLoginNew;
-document.getElementById('login-pass').addEventListener('keydown', function(e) { if(e.key==='Enter') doLoginNew(); });
+// login binding já feito no DOMContentLoaded acima
 
 function doLoginNew() {
   var uid = $('login-user').value, pass = $('login-pass').value;
