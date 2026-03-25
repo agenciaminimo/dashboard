@@ -1069,7 +1069,14 @@ function fetchAc(){
       var acs=d.data,total=acs.length,done=0,active=[],BATCH=8,batches=[];
       for(var i=0;i<acs.length;i+=BATCH)batches.push(acs.slice(i,i+BATCH));
       function runB(idx){
-        if(idx>=batches.length){hide('acProg');ALL_AC=active.sort(function(a,b){return parseFloat(b.ins.spend)-parseFloat(a.ins.spend)});renderAc(ALL_AC);return}
+        if(idx>=batches.length){
+            hide('acProg');
+            ALL_AC=active.sort(function(a,b){return parseFloat(b.ins.spend)-parseFloat(a.ins.spend)});
+            renderAc(ALL_AC);
+            // Se gestor ativo, atualiza o dashboard do gestor também
+            if(GESTOR_ATIVO) renderGestor(GESTOR_ATIVO);
+            return;
+          }
         Promise.all(batches[idx].map(function(ac){
           return Promise.all([fetchIns(ac.id,PRESET),fetchPrevIns(ac.id,PRESET)]).then(function(r){
             done++;$('acPb').style.width=Math.round((done/total)*100)+'%';setText('acPl',done+' de '+total);
@@ -1422,27 +1429,9 @@ function applyPP(){
   if(ctx==='saldos'&&TOKEN){ALL_SALDOS=[];fetchSaldos()}
   if(ctx==='detail'&&ACCOUNT)loadDetail(ACCOUNT);
   if(ctx==='gestor'&&GESTOR_ATIVO){
-    // Recarrega dados com novo período para o gestor
+    // Reutiliza fetchAc — ao terminar, renderGestor é chamado automaticamente
     ALL_AC=[];
-    apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token='+TOKEN)
-      .then(function(d){
-        var acs=d.data||[],total=acs.length,done=0,active=[],BATCH=8,batches=[];
-        for(var i=0;i<acs.length;i+=BATCH)batches.push(acs.slice(i,i+BATCH));
-        function rB(idx){
-          if(idx>=batches.length){
-            ALL_AC=active.sort(function(a,b){return parseFloat(b.ins.spend)-parseFloat(a.ins.spend)});
-            renderGestor(GESTOR_ATIVO);
-            return;
-          }
-          Promise.all(batches[idx].map(function(ac){
-            return Promise.all([fetchIns(ac.id,PRESET),fetchPrevIns(ac.id,PRESET)]).then(function(r){
-              done++;
-              if(r[0]&&parseFloat(r[0].spend||0)>0) active.push(Object.assign({},ac,{ins:r[0],prev:r[1]}));
-            }).catch(function(){done++});
-          })).then(function(){rB(idx+1)});
-        }
-        rB(0);
-      }).catch(function(e){console.error(e)});
+    fetchAc();
   }
 }
 document.addEventListener('click',function(e){
@@ -1635,38 +1624,14 @@ function renderGestor(resp) {
   var respLower = resp.toLowerCase();
   var contas = ALL_AC.filter(function(ac){ return getManager(ac.name) === respLower; });
 
-  if (!contas.length && !ALL_AC.length) {
-    // Dados não carregados ainda — carrega primeiro
+    if (!ALL_AC.length) {
+    // Dados não carregados — inicia carga e aguarda callback no fetchAc
     show('gestorProg');
-    setText('gestorPl', 'Carregando dados dos clientes...');
     $('gestorPb').style.width = '0%';
+    setText('gestorPl', 'Carregando dados dos clientes...');
     $('gestorKpis').innerHTML = '';
     $('gestorTbody').innerHTML = '<tr><td colspan="7" class="empty">Carregando...</td></tr>';
-
-    apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token='+TOKEN)
-      .then(function(d){
-        var acs = d.data||[], total=acs.length, done=0, active=[], BATCH=8, batches=[];
-        for(var i=0;i<acs.length;i+=BATCH) batches.push(acs.slice(i,i+BATCH));
-        function runB(idx){
-          if(idx>=batches.length){
-            hide('gestorProg');
-            ALL_AC = active.sort(function(a,b){return parseFloat(b.ins.spend)-parseFloat(a.ins.spend)});
-            renderAc(ALL_AC);
-            renderGestor(resp);
-            return;
-          }
-          Promise.all(batches[idx].map(function(ac){
-            return Promise.all([fetchIns(ac.id,PRESET),fetchPrevIns(ac.id,PRESET)]).then(function(r){
-              done++;
-              $('gestorPb').style.width=Math.round((done/total)*100)+'%';
-              setText('gestorPl',done+' de '+total);
-              if(r[0]&&parseFloat(r[0].spend||0)>0) active.push(Object.assign({},ac,{ins:r[0],prev:r[1]}));
-            }).catch(function(){done++});
-          })).then(function(){runB(idx+1)});
-        }
-        runB(0);
-      })
-      .catch(function(e){ hide('gestorProg'); show('gestorErr'); $('gestorErr').textContent=e.message; });
+    fetchAc();
     return;
   }
 
