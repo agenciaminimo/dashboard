@@ -320,13 +320,7 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
           <button class="btn btn-ghost btn-sm" id="fsAlert" onclick="setStatusFilter2('alert')" style="font-size:11px;color:#ef4444;border-color:rgba(239,68,68,.3)">Alerta</button>
         </div>
       </div>
-      <div class="resp-filter-bar" id="respFilterBar">
-  <span>Responsável:</span>
-  <button class="rf-btn on" onclick="setRespFilter('all',this)">Todos</button>
-  <button class="rf-btn" onclick="setRespFilter('Ediel',this)">Ediel</button>
-  <button class="rf-btn" onclick="setRespFilter('Rafael',this)">Rafael</button>
-</div>
-<div class="tbar">
+      <div class="tbar">
         <label>🔔 Alertar se resultado piorar mais de</label>
         <input type="range" id="thSlider" min="5" max="50" step="5" value="20">
         <span class="tbar-val" id="thVal">20%</span>
@@ -398,7 +392,7 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <div id="pp-gestor" class="pp-wrap"><button class="pp-btn" id="pp-gestorBtn" onclick="togglePP('gestor')"><span id="pp-gestorLbl">Últimos 30 dias</span><span class="pp-arr">▾</span></button></div>
+          <div id="ppGestor" class="pp-wrap"><button class="pp-btn" id="ppGestorBtn" onclick="togglePP('gestor')"><span id="ppGestorLbl">Últimos 30 dias</span><span class="pp-arr">▾</span></button></div>
         </div>
       </div>
       <div id="gestorErr" class="ebox" style="display:none"></div>
@@ -923,7 +917,7 @@ function navTo(view){
   var navEl=$('nav'+view.charAt(0).toUpperCase()+view.slice(1));
   if(navEl)navEl.classList.add('active');
   if(view==='saldos'&&TOKEN&&!ALL_SALDOS.length)fetchSaldos();
-  if(view==='clientes'){show('sbClientSec');if(TOKEN&&!ALL_AC.length)fetchAc();}
+  if(view==='clientes'){show('sbClientSec');if(TOKEN&&!ALL_AC.length)fetchAc();else renderAc(ALL_AC);}
 }
 
 $('btnBack').onclick = function(){
@@ -1037,6 +1031,7 @@ var STATUS_FILTER2 = 'all';
 
 function setMgrFilter(f) {
   MGR_FILTER = f;
+  ACTIVE_RESP_FILTER = f;
   ['fAll','fEdiel','fRafael'].forEach(function(id){ var el=$(id); if(el) el.style.fontWeight='400' });
   var active = f==='all'?'fAll':f==='ediel'?'fEdiel':'fRafael';
   var el=$(active); if(el) el.style.fontWeight='600';
@@ -1404,7 +1399,9 @@ function applyPP(){
   if(PP.preset!=='custom'){PRESET=PP.preset;PP.since=null;PP.until=null}
   else{PRESET='custom'}
   var lbl=(PP.preset!=='custom')?(PP_PRESETS.find(function(p){return p.v===PP.preset})||{l:PP.preset}).l:(PP.since.split('-').reverse().slice(0,2).join('/')+'→'+PP.until.split('-').reverse().slice(0,2).join('/'));
-  setText('pp'+ctx.charAt(0).toUpperCase()+ctx.slice(1)+'Lbl',lbl);
+  var ctxCap=ctx.charAt(0).toUpperCase()+ctx.slice(1);
+  var lblEl=$('pp'+ctxCap+'Lbl');
+  if(lblEl) lblEl.textContent=lbl;
   closePP();
   if(ctx==='clientes'&&TOKEN){ALL_AC=[];fetchAc()}
   if(ctx==='detail'&&ACCOUNT)loadDetail(ACCOUNT);
@@ -1575,6 +1572,7 @@ function cycleStatus(e,acId,btn){
 }
 function setRespFilter(resp,btn){
   ACTIVE_RESP_FILTER=resp;
+  MGR_FILTER=resp; // sincroniza com filtro principal
   document.querySelectorAll('.rf-btn').forEach(function(b){b.className='rf-btn'});
   btn.className='rf-btn '+(resp==='all'?'on':resp==='Ediel'?'on-e':'on-r');
   renderAc(ALL_AC);
@@ -1596,7 +1594,8 @@ function renderGestor(resp) {
   setText('pp-gestorLbl', $('pp-clientesLbl') ? $('pp-clientesLbl').textContent : 'Últimos 30 dias');
 
   // Filtra contas do gestor que têm gasto
-  var contas = ALL_AC.filter(function(ac){ return getResp(ac.name) === resp; });
+  var respLower = resp.toLowerCase();
+  var contas = ALL_AC.filter(function(ac){ return getManager(ac.name) === respLower; });
 
   if (!contas.length && !ALL_AC.length) {
     // Dados não carregados ainda — carrega primeiro
