@@ -154,6 +154,38 @@
 
   .screen { display: none; }
   .screen.active { display: block; }
+
+  /* NAV TABS */
+  .nav-active { background: var(--accent-dim) !important; border-color: var(--accent-border) !important; color: var(--accent) !important; }
+
+  /* SALDO GRID */
+  .saldo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+  .saldo-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px; transition: all 0.15s; }
+  .saldo-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .saldo-card.alert-low { border-color: rgba(255,95,95,0.35); }
+  .saldo-card.alert-warn { border-color: rgba(255,157,74,0.35); }
+  .saldo-card-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 14px; }
+  .saldo-amount { font-size: 28px; font-weight: 300; font-family: 'DM Mono', monospace; line-height: 1; margin-bottom: 4px; }
+  .saldo-amount.high { color: var(--green); }
+  .saldo-amount.mid  { color: var(--accent); }
+  .saldo-amount.low  { color: var(--orange); }
+  .saldo-amount.crit { color: var(--red); }
+  .saldo-amount.postpaid { color: var(--muted); }
+  .saldo-meta { font-size: 12px; color: var(--muted); margin-top: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .saldo-days { font-size: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .saldo-days-label { color: var(--muted); }
+  .saldo-days-val { font-weight: 500; }
+  .saldo-days-val.ok   { color: var(--green); }
+  .saldo-days-val.warn { color: var(--orange); }
+  .saldo-days-val.crit { color: var(--red); }
+  .saldo-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+  .saldo-pill-prepaid  { background: rgba(200,242,58,0.1); color: var(--accent); }
+  .saldo-pill-postpaid { background: var(--bg4); color: var(--muted); }
+  .saldo-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 24px; }
+  .saldo-sum-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .saldo-sum-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .saldo-sum-val { font-size: 22px; font-weight: 300; font-family: 'DM Mono', monospace; }
+  .saldo-sort { display: flex; gap: 6px; }
   .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 13px; }
@@ -216,6 +248,8 @@
         <option value="this_month">Este mês</option>
         <option value="last_month">Mês passado</option>
       </select>
+      <button class="btn btn-ghost btn-sm" id="btn-nav-contas" onclick="goToContas()" style="border-color:var(--accent-border);color:var(--accent)">Contas</button>
+      <button class="btn btn-ghost btn-sm" id="btn-nav-saldos" onclick="goToSaldos()">Saldos</button>
       <span class="topbar-user">Olá, <span id="topbar-username">—</span></span>
       <button class="btn btn-ghost btn-sm" id="btn-logout">Sair</button>
     </div>
@@ -289,6 +323,48 @@
   </div>
 </div>
 
+<!-- SALDOS -->
+<div id="screen-saldos" class="screen">
+  <div class="topbar">
+    <span class="topbar-logo">Mínimo <span>·</span></span>
+    <span class="topbar-sep"></span>
+    <span class="topbar-title">Saldos das Contas</span>
+    <div class="topbar-right">
+      <button class="btn btn-ghost btn-sm" id="btn-nav-contas2" onclick="goToContas()">Contas</button>
+      <button class="btn btn-ghost btn-sm nav-active" onclick="goToSaldos()">Saldos</button>
+      <div id="saldo-loading" style="display:none"><span class="spinner"></span></div>
+      <span class="topbar-user">Olá, <span id="topbar-username-saldo">—</span></span>
+      <button class="btn btn-ghost btn-sm" id="btn-logout-saldo">Sair</button>
+    </div>
+  </div>
+  <div class="page">
+    <div id="saldo-error" class="error-box" style="display:none"></div>
+    <div class="saldo-summary" id="saldo-summary"></div>
+    <div class="section-header" style="margin-bottom:14px">
+      <div>
+        <p class="section-eyebrow">Contas pré-pagas</p>
+        <h2 class="section-title" id="saldo-count">—</h2>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="saldo-sort filters">
+          <button class="filter-btn active" data-sort="saldo">Menor saldo</button>
+          <button class="filter-btn" data-sort="nome">Nome</button>
+          <button class="filter-btn" data-sort="dias">Menos dias</button>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="saldo-search" placeholder="Buscar conta..." />
+        </div>
+      </div>
+    </div>
+    <div id="saldo-progress" class="progress-wrap" style="display:none">
+      <div class="progress-bar-bg"><div class="progress-bar" id="saldo-progress-bar"></div></div>
+      <p class="progress-label" id="saldo-progress-label">Carregando saldos...</p>
+    </div>
+    <div class="saldo-grid" id="saldo-grid"></div>
+  </div>
+</div>
+
 <!-- MODAL TOKEN -->
 <div id="modal-token" class="modal-bg" style="display:none">
   <div class="modal">
@@ -306,6 +382,182 @@
 </div>
 
 <script>
+// ══ SALDOS ════════════════════════════════════════════════════════════════
+var ALL_SALDOS = [];
+var SALDO_SORT = 'saldo';
+
+function goToContas() {
+  ['screen-saldos','screen-detail'].forEach(hide);
+  show('screen-accounts');
+  document.getElementById('btn-nav-contas') && (document.getElementById('btn-nav-contas').className = 'btn btn-ghost btn-sm nav-active');
+  document.getElementById('btn-nav-saldos') && (document.getElementById('btn-nav-saldos').className = 'btn btn-ghost btn-sm');
+}
+
+function goToSaldos() {
+  ['screen-accounts','screen-detail'].forEach(hide);
+  show('screen-saldos');
+  setText('topbar-username-saldo', CURRENT_USER ? USERS[CURRENT_USER].name : '—');
+  document.getElementById('btn-nav-contas') && (document.getElementById('btn-nav-contas').className = 'btn btn-ghost btn-sm');
+  document.getElementById('btn-nav-saldos') && (document.getElementById('btn-nav-saldos').className = 'btn btn-ghost btn-sm nav-active');
+  if (!META_TOKEN) { showEl('saldo-error'); $('saldo-error').textContent = 'Configure o token primeiro.'; return; }
+  if (ALL_SALDOS.length === 0) fetchSaldos();
+  else renderSaldos();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var logoutSaldo = document.getElementById('btn-logout-saldo');
+  if (logoutSaldo) logoutSaldo.onclick = doLogout;
+});
+
+function fetchSaldos() {
+  ALL_SALDOS = [];
+  showEl('saldo-error', false);
+  showEl('saldo-progress');
+  $('saldo-progress-bar').style.width = '0%';
+  setText('saldo-progress-label', 'Buscando contas...');
+  $('saldo-grid').innerHTML = '';
+  $('saldo-summary').innerHTML = '';
+  setText('saldo-count', '—');
+
+  apiFetch(BASE + '/me/adaccounts?fields=name,account_id,account_status,currency,balance,amount_spent,spend_cap,funding_source_details&limit=200&access_token=' + META_TOKEN)
+    .then(function(d) {
+      var accounts = d.data || [];
+      var total = accounts.length;
+      var done = 0;
+      var BATCH = 10;
+      var batches = [];
+      for (var i = 0; i < accounts.length; i += BATCH) batches.push(accounts.slice(i, i + BATCH));
+
+      function runBatch(idx) {
+        if (idx >= batches.length) {
+          showEl('saldo-progress', false);
+          renderSaldos();
+          return;
+        }
+        Promise.all(batches[idx].map(function(ac) {
+          // Busca gasto diário médio dos últimos 7 dias para estimar dias restantes
+          return fetchInsights(ac.id, 'last_7d').then(function(ins) {
+            done++;
+            var pct = Math.round((done / total) * 100);
+            $('saldo-progress-bar').style.width = pct + '%';
+            setText('saldo-progress-label', done + ' de ' + total);
+
+            var balance = ac.balance ? parseFloat(ac.balance) / 100 : null;
+            var isPostpaid = !ac.balance || ac.balance === '0';
+            var dailySpend = ins ? parseFloat(ins.spend || 0) / 7 : 0;
+            var daysLeft = (balance && dailySpend > 0) ? Math.floor(balance / dailySpend) : null;
+
+            // Só adiciona contas ativas
+            if (ac.account_status === 1) {
+              ALL_SALDOS.push({
+                id: ac.id,
+                name: ac.name,
+                currency: ac.currency || 'BRL',
+                balance: balance,
+                isPostpaid: isPostpaid,
+                dailySpend: dailySpend,
+                daysLeft: daysLeft,
+                funding: ac.funding_source_details
+              });
+            }
+          }).catch(function() { done++; });
+        })).then(function() { runBatch(idx + 1); });
+      }
+      runBatch(0);
+    })
+    .catch(function(e) { showEl('saldo-progress', false); showEl('saldo-error'); $('saldo-error').textContent = e.message; });
+}
+
+function renderSaldos() {
+  var search = ($('saldo-search') ? $('saldo-search').value || '' : '').toLowerCase();
+  var list = ALL_SALDOS.filter(function(s) { return !search || s.name.toLowerCase().indexOf(search) >= 0; });
+
+  // Ordena
+  list = list.slice().sort(function(a, b) {
+    if (SALDO_SORT === 'saldo') {
+      if (a.isPostpaid && !b.isPostpaid) return 1;
+      if (!a.isPostpaid && b.isPostpaid) return -1;
+      return (a.balance || 9999) - (b.balance || 9999);
+    }
+    if (SALDO_SORT === 'dias') {
+      if (a.daysLeft === null && b.daysLeft !== null) return 1;
+      if (a.daysLeft !== null && b.daysLeft === null) return -1;
+      return (a.daysLeft || 999) - (b.daysLeft || 999);
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+  var prepaid = list.filter(function(s) { return !s.isPostpaid; });
+  var alerts = prepaid.filter(function(s) { return s.daysLeft !== null && s.daysLeft <= 5; });
+  var totalSaldo = prepaid.reduce(function(sum, s) { return sum + (s.balance || 0); }, 0);
+
+  setText('saldo-count', prepaid.length + ' conta' + (prepaid.length !== 1 ? 's' : '') + ' pré-pagas' + (alerts.length ? ' · ' + alerts.length + ' alerta' + (alerts.length > 1 ? 's' : '') : ''));
+
+  // Summary cards
+  $('saldo-summary').innerHTML = [
+    { label: 'Saldo total',    val: fmt(totalSaldo, 'currency') },
+    { label: 'Contas pré-pagas', val: fmt(prepaid.length, 'int') },
+    { label: 'Alertas (≤5 dias)', val: fmt(alerts.length, 'int') },
+    { label: 'Gasto/dia (média)', val: prepaid.length ? fmt(prepaid.reduce(function(s,a){return s+a.dailySpend;},0)/prepaid.length,'currency') : '—' },
+  ].map(function(x) {
+    return '<div class="saldo-sum-card"><div class="saldo-sum-label">' + x.label + '</div><div class="saldo-sum-val">' + x.val + '</div></div>';
+  }).join('');
+
+  var grid = $('saldo-grid');
+  grid.innerHTML = '';
+
+  list.forEach(function(s) {
+    if (s.isPostpaid) return; // Só mostra pré-pagas no grid
+
+    var balCls = s.balance === null ? 'postpaid' : s.balance > 500 ? 'high' : s.balance > 200 ? 'mid' : s.balance > 100 ? 'low' : 'crit';
+    var cardCls = 'saldo-card' + (s.daysLeft !== null && s.daysLeft <= 3 ? ' alert-low' : s.daysLeft !== null && s.daysLeft <= 5 ? ' alert-warn' : '');
+    var daysCls = s.daysLeft === null ? '' : s.daysLeft > 10 ? 'ok' : s.daysLeft > 5 ? 'warn' : 'crit';
+    var daysVal = s.daysLeft !== null ? s.daysLeft + ' dias restantes' : '—';
+
+    var card = document.createElement('div');
+    card.className = cardCls;
+    card.innerHTML =
+      '<div class="saldo-card-name" title="' + s.name + '">' + s.name + '</div>' +
+      '<div class="saldo-amount ' + balCls + '">' + fmt(s.balance, 'currency', s.currency) + '</div>' +
+      '<div class="saldo-meta">' +
+        '<span class="saldo-pill saldo-pill-prepaid">Pré-pago</span>' +
+        '<span style="font-size:12px;color:var(--muted)">R$/dia ' + fmt(s.dailySpend, 'currency', s.currency) + '</span>' +
+      '</div>' +
+      '<div class="saldo-days">' +
+        '<span class="saldo-days-label">Estimativa</span>' +
+        '<span class="saldo-days-val ' + daysCls + '">' + daysVal + '</span>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  // Pós-pagas: mostra como lista simples no fim
+  var postpaid = list.filter(function(s) { return s.isPostpaid; });
+  if (postpaid.length > 0) {
+    var div = document.createElement('div');
+    div.style.cssText = 'margin-top:24px;grid-column:1/-1';
+    div.innerHTML = '<p style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">' + postpaid.length + ' contas pós-pagas / cartão</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+      postpaid.map(function(s) {
+        return '<span style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:5px 12px;font-size:12px;color:var(--muted)">' + s.name + '</span>';
+      }).join('') + '</div>';
+    grid.appendChild(div);
+  }
+}
+
+// Filtros de sort
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.saldo-sort .filter-btn').forEach(function(btn) {
+    btn.onclick = function() {
+      document.querySelectorAll('.saldo-sort .filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      SALDO_SORT = btn.dataset.sort;
+      renderSaldos();
+    };
+  });
+  var si = document.getElementById('saldo-search');
+  if (si) si.addEventListener('input', function() { renderSaldos(); });
+});
+
 // ══ USUÁRIOS ══════════════════════════════════════════════════════════════
 var USERS = {
   alvaro: { name: 'Álvaro', pass: 'minimo@2025' },
@@ -376,7 +628,7 @@ var OBJ_COLS = {
 
 // ══ TOKEN PADRÃO ═════════════════════════════════════════════════════════
 // Quando expirar (60 dias), troque aqui e faça commit no GitHub
-var TOKEN_PADRAO = 'EAAtZBfOvxO6YBRDhX4pOT3k0jdQQWEQZCFZBO5SHR8LfyXqx7zikHGOxKOuQB6328E2YAuSgd7BsgCgm3CqOZBHIOEwThaZBll3M5bDuENuZCRg7ijudLS3fmQEwnQ6jmXyLYWmvKLZCKYP7i5a4ZAov8JuOZAyouz8p0f5PXZCv9H9ZACWihx6HyJwfFo3hmq0';
+var TOKEN_PADRAO = 'EAAtZBfOvxO6YBRAwoY3WknJgxBeiO6pZBNnMJjihiGTBuhVqRk219mop436gHtlS009aJEDbUP2D2yydzhHnLU2PBTWI4CehWrSsZCzKUyuNFbjZATjT60mfNngfe6Qd5SjPwJAlEoNyR8aMjjdsH9l9xSjJlD9rZC1yZAZC4mrzyzk1y43ZBvYt6sgcsskc';
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V = 'v20.0';
@@ -599,6 +851,7 @@ function doLogin() {
   if (!user || pass !== user.pass) { showEl('login-error'); $('login-error').textContent='Senha incorreta.'; return; }
   CURRENT_USER = uid; META_TOKEN = loadToken(uid) || TOKEN_PADRAO; PRESET = 'last_30d';
   var sl = document.getElementById('screen-login'); sl.style.display='none'; sl.classList.remove('active'); show('screen-accounts');
+  ALL_SALDOS = []; // reseta saldos ao fazer login
   setText('topbar-username', user.name);
   $('period-accounts').value = PRESET;
   updateTokenStatus();
