@@ -313,6 +313,7 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
         <div>
           <button class="btn btn-ghost btn-sm" id="btnBack" style="margin-bottom:8px">← Clientes</button>
           <h1 class="ph-title" id="detTitle">—</h1>
+          <p id="detAccName" style="font-size:11px;color:var(--t3);margin-top:2px;display:none"></p>
           <p class="pcomp" id="detComp" style="display:none;margin-top:4px"></p>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -395,6 +396,61 @@ var USERS = {
   ediel: {name:'Ediel', pass:'minimo@2025'},
   pedro: {name:'Pedro', pass:'minimo@2025'}
 };
+
+
+// ══ MAPA DE CLIENTES ════════════════════════════════════════════════════
+// Chave: parte do nome da conta (lowercase) → nome real do cliente
+var CLIENT_MAP = [
+  {match:/alz construtora/i,           name:"ALZ Construtora",              seg:"Imobiliário"},
+  {match:/ac[aá]cio metalur/i,         name:"Acácio Metalúrgica",           seg:"Indústria"},
+  {match:/requintare/i,                name:"Requintare Store",              seg:"Varejo"},
+  {match:/acasadooleo|casa do [oó]leo/i,name:"A Casa do Óleo",              seg:"Varejo"},
+  {match:/marcelo martins/i,           name:"Marcelo Martins",              seg:"Serviços"},
+  {match:/fus[aã]o construtora/i,      name:"Fusão Construtora",            seg:"Imobiliário"},
+  {match:/floravita/i,                 name:"Floravita",                    seg:"Varejo"},
+  {match:/agro.?matos/i,               name:"Agrocomercial Matos",          seg:"Agro"},
+  {match:/rafael starosky/i,           name:"Rafael Starosky Machado",      seg:"Pessoal"},
+  {match:/jett ve[ií]culos/i,          name:"Jett Veículos",                seg:"Automotivo"},
+  {match:/la reserva/i,                name:"LA Reserva",                   seg:"Imobiliário"},
+  {match:/gramaria sint/i,             name:"Gramaria Sintética",           seg:"Varejo"},
+  {match:/ar marinho/i,                name:"Ar Marinho Ateliê",            seg:"Varejo"},
+  {match:/marc[e]lo/i,                 name:"Marcelo Martins",              seg:"Serviços"},
+  {match:/farm[aá]cia mcoelho/i,       name:"Farmácia MCoelho",             seg:"Saúde"},
+  {match:/halze/i,                     name:"Halze Construtora",            seg:"Imobiliário"},
+  {match:/nathan despachante/i,        name:"Nathan Despachante",           seg:"Serviços"},
+  {match:/alex andrade/i,              name:"Alex Andrade Imóveis",         seg:"Imobiliário"},
+  {match:/enzo althoff/i,              name:"Enzo Althoff",                 seg:"Outros"},
+  {match:/minimo|m[ií]nimo/i,          name:"Mínimo Marketing",             seg:"Agência"},
+  {match:/luiz alt/i,                  name:"Luiz Altenburg",               seg:"Outros"},
+  {match:/domus/i,                     name:"Domus",                        seg:"Imobiliário"},
+  {match:/ki alfajor/i,                name:"Ki Alfajor SC",                seg:"Alimentos"},
+  {match:/flavored popcorn/i,          name:"Flavored PopCorn",             seg:"Alimentos"},
+  {match:/bluepack/i,                  name:"Bluepack Embalagens",          seg:"B2B"},
+  {match:/mello e rosa/i,              name:"Mello e Rosa O2",              seg:"Saúde"},
+  {match:/d[eé]io autom/i,             name:"Déio Automóveis",              seg:"Automotivo"},
+  {match:/vaapty/i,                    name:"Vaapty",                       seg:"Varejo"},
+  {match:/auto sul/i,                  name:"Auto Sul Repasses",            seg:"Automotivo"},
+  {match:/mla constru/i,               name:"MLA Construções",              seg:"Imobiliário"},
+  {match:/sanpol/i,                    name:"Sanpol Empreendimentos",       seg:"Imobiliário"},
+  {match:/kd empreend/i,               name:"KD Empreendimentos",           seg:"Imobiliário"},
+  {match:/278 empreend/i,              name:"278 Empreendimentos",          seg:"Imobiliário"},
+  {match:/instaladora imperatriz/i,    name:"Instaladora Imperatriz",       seg:"Serviços"},
+  {match:/ribeiro ar/i,                name:"Ribeiro Ar-Condicionado",      seg:"Serviços"},
+];
+
+function getClientInfo(acName) {
+  for (var i = 0; i < CLIENT_MAP.length; i++) {
+    if (CLIENT_MAP[i].match.test(acName)) {
+      return { name: CLIENT_MAP[i].name, seg: CLIENT_MAP[i].seg };
+    }
+  }
+  return null;
+}
+
+function getDisplayName(acName) {
+  var info = getClientInfo(acName);
+  return info ? info.name : acName;
+}
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V='v20.0', BASE='https://graph.facebook.com/'+V;
@@ -679,7 +735,9 @@ function renderSaldos(){
     var cc='sc2'+(s.days!==null&&s.days<=3?' al':s.days!==null&&s.days<=5?' aw':'');
     var dc=s.days===null?'':s.days>10?'ok':s.days>5?'wn':'cr';
     var card=document.createElement('div');card.className=cc;
-    card.innerHTML='<div class="sc2-name" title="'+s.name+'">'+s.name+'</div>'+
+    var sdn=getDisplayName(s.name);
+    card.innerHTML='<div class="sc2-name" title="'+s.name+'">'+sdn+'</div>'+
+      (sdn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-top:-10px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
       '<div class="sa '+bc+'">'+fmt(s.balance,'cur',s.cur)+'</div>'+
       '<div class="sm"><span style="font-size:11px;background:var(--adim);color:var(--accent);padding:2px 8px;border-radius:20px">Pré-pago</span><span>R$/dia '+fmt(s.daily,'cur',s.cur)+'</span></div>'+
       '<div class="sd"><span style="color:var(--muted)">Estimativa</span><span class="sdv '+dc+'">'+(s.days!==null?s.days+' dias':'—')+'</span></div>';
@@ -745,8 +803,10 @@ function renderAc(acs){
     if(als.length)alerts++;
     var card=document.createElement('div');
     card.className='cc'+(als.length?' ha':'');
+    var dispName = getDisplayName(ac.name);
     card.innerHTML=(als.length?'<div class="abadge">!</div>':'')+
-      '<div class="cc-name" title="'+ac.name+'">'+ac.name+'</div>'+
+      '<div class="cc-name" title="'+ac.name+'">'+dispName+'</div>'+
+      '<div style="font-size:10px;color:var(--t3);margin-top:-6px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ac.name+'</div>'+
       '<div class="cc-row"><div class="cc-spend">'+fmt(ins.spend,'cur',ac.currency)+'</div>'+acDelta(ds,true)+'</div>'+
       '<div class="cc-row"><div class="cc-kpi">'+(res?res.label:'Resultado')+': <span>'+(res?fmt(res.value,'int'):'—')+'</span></div>'+acDelta(dr,false)+'</div>'+
       '<div class="cc-row"><div class="cc-kpi">'+(res?res.costLabel:'Custo')+': <span>'+(res&&res.cost!==null?fmt(res.cost,'cur',ac.currency):'—')+'</span></div>'+acDelta(dc,true)+'</div>'+
@@ -756,7 +816,7 @@ function renderAc(acs){
     g.appendChild(card);
     if(sbList){
       var si=document.createElement('button');si.className='sb-item sb-client-item';si.id='sbc_'+ac.id;
-      si.innerHTML='<span class="sb-dot '+(ac.account_status===1?'on':'off')+'"></span><span style="overflow:hidden;text-overflow:ellipsis">'+ac.name+'</span>';
+      var dn=getDisplayName(ac.name); si.innerHTML='<span class="sb-dot '+(ac.account_status===1?'on':'off')+'"></span><span style="overflow:hidden;text-overflow:ellipsis" title="'+ac.name+'">'+dn+'</span>';
       (function(a){si.onclick=function(){openDetail(a)}})(ac);
       sbList.appendChild(si);
     }
@@ -774,7 +834,8 @@ function openDetail(ac){
   document.querySelectorAll('.sb-client-item').forEach(function(e){e.classList.remove('active')});
   var si=$('sbc_'+ac.id);if(si)si.classList.add('active');
   show('vDetalhe');
-  setText('detTitle',ac.name);hide('detComp');
+  setText('detTitle', getDisplayName(ac.name));
+  if(getDisplayName(ac.name)!==ac.name){var sub=document.getElementById('detAccName');if(sub){sub.textContent=ac.name;sub.style.display=''}}hide('detComp');
   loadDetail(ac);
 }
 
