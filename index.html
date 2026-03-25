@@ -117,6 +117,27 @@
   .camp-group-title { font-size: 13px; font-weight: 500; color: var(--muted); }
   .camp-group-count { font-size: 12px; color: var(--muted2); }
 
+  /* TABS CAMPANHA / CONJUNTOS */
+  .detail-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; width: fit-content; }
+  .detail-tab { padding: 7px 16px; border-radius: 7px; font-size: 13px; cursor: pointer; color: var(--muted); border: none; background: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .detail-tab:hover { color: var(--text); }
+  .detail-tab.active { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+
+  /* CONJUNTOS TABLE */
+  .conj-table td.td-budget { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+  .conj-table td.td-result { font-weight: 500; color: var(--text); }
+  .conj-table td.td-cost { font-family: 'DM Mono', monospace; }
+  .cost-good { color: var(--green); }
+  .cost-ok   { color: var(--accent); }
+  .cost-bad  { color: var(--red); }
+  .freq-warn { color: var(--orange); }
+  .freq-ok   { color: var(--muted); }
+
+  /* BARRA DE ORÇAMENTO */
+  .budget-bar { height: 3px; background: var(--border2); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .budget-bar-fill { height: 3px; border-radius: 2px; background: var(--accent); transition: width 0.4s; }
+  .budget-bar-fill.over { background: var(--red); }
+
   .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
   .badge-green  { background: rgba(74,222,128,0.12);  color: var(--green); }
   .badge-yellow { background: rgba(255,157,74,0.12);  color: var(--orange); }
@@ -199,6 +220,40 @@
   .token-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
   .token-dot.missing { background: var(--red); }
   .period-compare { font-size: 11px; color: var(--muted2); margin-bottom: 20px; }
+
+  /* PERIOD PICKER */
+  .period-picker { position: relative; display: inline-flex; align-items: center; }
+  .period-picker-btn { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius); font-size: 13px; cursor: pointer; border: 1px solid var(--border2); background: var(--bg3); color: var(--text); font-family: 'DM Sans', sans-serif; white-space: nowrap; transition: all 0.15s; min-width: 160px; justify-content: space-between; }
+  .period-picker-btn:hover { background: var(--bg4); }
+  .period-picker-btn .pp-icon { font-size: 12px; color: var(--muted); }
+  .pp-dropdown { position: fixed; z-index: 999; background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg); box-shadow: 0 8px 32px rgba(0,0,0,0.5); padding: 0; overflow: hidden; width: 680px; }
+  .pp-presets { padding: 12px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; }
+  .pp-preset { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .pp-preset:hover { border-color: var(--border2); color: var(--text); }
+  .pp-preset.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); }
+  .pp-calendars { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .pp-cal { padding: 16px; }
+  .pp-cal + .pp-cal { border-left: 1px solid var(--border); }
+  .pp-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .pp-cal-title { font-size: 13px; font-weight: 500; }
+  .pp-cal-nav { display: flex; gap: 4px; }
+  .pp-nav-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: all 0.1s; }
+  .pp-nav-btn:hover { color: var(--text); background: var(--bg3); }
+  .pp-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .pp-day-header { text-align: center; font-size: 10px; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 0; }
+  .pp-day { text-align: center; font-size: 12px; padding: 6px 4px; border-radius: 6px; cursor: pointer; transition: all 0.1s; color: var(--text); line-height: 1; }
+  .pp-day:hover { background: var(--bg4); }
+  .pp-day.empty { cursor: default; }
+  .pp-day.today { color: var(--accent); font-weight: 500; }
+  .pp-day.selected-start, .pp-day.selected-end { background: var(--accent) !important; color: #0d0d0d !important; font-weight: 500; border-radius: 6px; }
+  .pp-day.in-range { background: var(--accent-dim); color: var(--text); border-radius: 0; }
+  .pp-day.in-range.selected-start { border-radius: 6px 0 0 6px; }
+  .pp-day.in-range.selected-end { border-radius: 0 6px 6px 0; }
+  .pp-day.other-month { color: var(--muted2); }
+  .pp-day.disabled { color: var(--muted2); cursor: not-allowed; opacity: 0.4; }
+  .pp-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .pp-range-label { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .pp-actions { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -240,14 +295,12 @@
         <span class="token-dot" id="token-dot"></span>
         <span id="token-status-label">Token</span>
       </div>
-      <select id="period-accounts" style="width:auto;min-width:130px">
-        <option value="today">Hoje</option>
-        <option value="yesterday">Ontem</option>
-        <option value="last_7d">7 dias</option>
-        <option value="last_30d" selected>30 dias</option>
-        <option value="this_month">Este mês</option>
-        <option value="last_month">Mês passado</option>
-      </select>
+      <div class="period-picker" id="pp-accounts">
+        <button class="period-picker-btn" id="pp-accounts-btn" onclick="togglePP('accounts')">
+          <span id="pp-accounts-label">Últimos 30 dias</span>
+          <span class="pp-icon">▾</span>
+        </button>
+      </div>
       <button class="btn btn-ghost btn-sm" id="btn-nav-contas" onclick="goToContas()" style="border-color:var(--accent-border);color:var(--accent)">Contas</button>
       <button class="btn btn-ghost btn-sm" id="btn-nav-saldos" onclick="goToSaldos()">Saldos</button>
       <span class="topbar-user">Olá, <span id="topbar-username">—</span></span>
@@ -292,14 +345,12 @@
     <span class="topbar-title" id="detail-title">—</span>
     <div class="topbar-right">
       <div id="detail-loading" style="display:none"><span class="spinner"></span></div>
-      <select id="period-detail" style="width:auto;min-width:130px">
-        <option value="today">Hoje</option>
-        <option value="yesterday">Ontem</option>
-        <option value="last_7d">7 dias</option>
-        <option value="last_30d" selected>30 dias</option>
-        <option value="this_month">Este mês</option>
-        <option value="last_month">Mês passado</option>
-      </select>
+      <div class="period-picker" id="pp-detail">
+        <button class="period-picker-btn" id="pp-detail-btn" onclick="togglePP('detail')">
+          <span id="pp-detail-label">Últimos 30 dias</span>
+          <span class="pp-icon">▾</span>
+        </button>
+      </div>
       <button class="btn btn-ghost btn-sm" id="btn-logout2">Sair</button>
     </div>
   </div>
@@ -307,19 +358,63 @@
     <div id="detail-error" class="error-box" style="display:none"></div>
     <p class="period-compare" id="detail-compare-label" style="display:none;margin-bottom:16px"></p>
     <div class="metric-grid" id="metric-grid"></div>
-    <div class="section-header" style="margin-bottom:14px">
-      <div>
-        <p class="section-eyebrow">Campanhas</p>
-        <h3 class="section-title" id="camp-count">—</h3>
+    <div class="detail-tabs">
+      <button class="detail-tab active" id="tab-campanhas" onclick="switchDetailTab('campanhas')">Campanhas</button>
+      <button class="detail-tab" id="tab-conjuntos" onclick="switchDetailTab('conjuntos')">Conjuntos de anúncios</button>
+    </div>
+
+    <!-- TAB CAMPANHAS -->
+    <div id="tab-content-campanhas">
+      <div class="section-header" style="margin-bottom:14px">
+        <div>
+          <p class="section-eyebrow">Campanhas</p>
+          <h3 class="section-title" id="camp-count">—</h3>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" data-status="ALL">Todas</button>
+          <button class="filter-btn" data-status="ACTIVE">Ativas</button>
+          <button class="filter-btn" data-status="PAUSED">Pausadas</button>
+          <button class="filter-btn" data-status="ARCHIVED">Arquivadas</button>
+        </div>
       </div>
-      <div class="filters">
-        <button class="filter-btn active" data-status="ALL">Todas</button>
-        <button class="filter-btn" data-status="ACTIVE">Ativas</button>
-        <button class="filter-btn" data-status="PAUSED">Pausadas</button>
-        <button class="filter-btn" data-status="ARCHIVED">Arquivadas</button>
+      <div id="camp-groups"></div>
+    </div>
+
+    <!-- TAB CONJUNTOS -->
+    <div id="tab-content-conjuntos" style="display:none">
+      <div class="section-header" style="margin-bottom:14px">
+        <div>
+          <p class="section-eyebrow">Conjuntos de anúncios</p>
+          <h3 class="section-title" id="conj-count">—</h3>
+        </div>
+        <div class="filters">
+          <button class="filter-btn conj-filter active" data-status="ALL">Todos</button>
+          <button class="filter-btn conj-filter" data-status="ACTIVE">Ativos</button>
+          <button class="filter-btn conj-filter" data-status="PAUSED">Pausados</button>
+        </div>
+      </div>
+      <div id="conj-loading" style="display:none;margin-bottom:16px"><span class="spinner"></span> Carregando conjuntos...</div>
+      <div class="table-wrap">
+        <table class="conj-table">
+          <thead>
+            <tr>
+              <th>Conjunto</th>
+              <th>Campanha</th>
+              <th>Status</th>
+              <th class="r">Resultado</th>
+              <th class="r">Custo/Res.</th>
+              <th class="r">Alcance</th>
+              <th class="r">Freq.</th>
+              <th class="r">Orçamento</th>
+              <th class="r">Valor usado</th>
+              <th class="r">Impressões</th>
+            </tr>
+          </thead>
+          <tbody id="conj-tbody"></tbody>
+          <tfoot id="conj-tfoot"></tfoot>
+        </table>
       </div>
     </div>
-    <div id="camp-groups"></div>
   </div>
 </div>
 
@@ -365,6 +460,22 @@
   </div>
 </div>
 
+<!-- PERIOD PICKER DROPDOWN -->
+<div id="pp-dropdown" class="pp-dropdown" style="display:none">
+  <div class="pp-presets" id="pp-presets-list"></div>
+  <div class="pp-calendars">
+    <div class="pp-cal" id="pp-cal-left"></div>
+    <div class="pp-cal" id="pp-cal-right"></div>
+  </div>
+  <div class="pp-footer">
+    <span class="pp-range-label" id="pp-range-label">Selecione um período</span>
+    <div class="pp-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closePP()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" id="pp-apply-btn" onclick="applyPP()" disabled>Aplicar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TOKEN -->
 <div id="modal-token" class="modal-bg" style="display:none">
   <div class="modal">
@@ -382,6 +493,261 @@
 </div>
 
 <script>
+// ══ PERIOD PICKER ════════════════════════════════════════════════════════
+var PP_STATE = {
+  context: null,       // 'accounts' | 'detail'
+  selecting: 'start',  // 'start' | 'end'
+  startDate: null,     // Date
+  endDate: null,       // Date
+  leftMonth: new Date(),
+  rightMonth: new Date(),
+  currentPreset: 'last_30d',
+  customSince: null,
+  customUntil: null
+};
+
+var PP_PRESETS = [
+  { value: 'today',      label: 'Hoje' },
+  { value: 'yesterday',  label: 'Ontem' },
+  { value: 'last_7d',    label: '7 dias' },
+  { value: 'last_30d',   label: '30 dias' },
+  { value: 'this_month', label: 'Este mês' },
+  { value: 'last_month', label: 'Mês passado' },
+  { value: 'custom',     label: 'Personalizado' },
+];
+
+var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var DAY_NAMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function presetToLabel(preset, since, until) {
+  var map = { today:'Hoje', yesterday:'Ontem', last_7d:'Últimos 7 dias', last_30d:'Últimos 30 dias', this_month:'Este mês', last_month:'Mês passado' };
+  if (preset === 'custom' && since && until) return since.split('-').reverse().slice(0,2).join('/') + ' → ' + until.split('-').reverse().slice(0,2).join('/');
+  return map[preset] || preset;
+}
+
+function togglePP(ctx) {
+  var dd = $('pp-dropdown');
+  if (dd.style.display !== 'none' && PP_STATE.context === ctx) { closePP(); return; }
+  PP_STATE.context = ctx;
+  PP_STATE.selecting = 'start';
+  PP_STATE.startDate = null;
+  PP_STATE.endDate = null;
+
+  // Posiciona o dropdown
+  var btn = document.getElementById('pp-' + ctx + '-btn');
+  var rect = btn.getBoundingClientRect();
+  dd.style.display = '';
+  dd.style.top = (rect.bottom + 6) + 'px';
+  // Alinha à direita do botão mas não sai da tela
+  var left = rect.right - 680;
+  if (left < 8) left = 8;
+  dd.style.left = left + 'px';
+
+  // Inicializa meses
+  var now = new Date();
+  PP_STATE.rightMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  PP_STATE.leftMonth  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  renderPPPresets();
+  renderPPCals();
+  updatePPFooter();
+}
+
+function closePP() {
+  $('pp-dropdown').style.display = 'none';
+  PP_STATE.context = null;
+}
+
+function renderPPPresets() {
+  $('pp-presets-list').innerHTML = PP_PRESETS.map(function(p) {
+    var active = PP_STATE.currentPreset === p.value ? ' active' : '';
+    return '<button class="pp-preset' + active + '" onclick="selectPPPreset('' + p.value + '')">' + p.label + '</button>';
+  }).join('');
+}
+
+function selectPPPreset(value) {
+  if (value === 'custom') {
+    PP_STATE.currentPreset = 'custom';
+    PP_STATE.startDate = null;
+    PP_STATE.endDate = null;
+    PP_STATE.selecting = 'start';
+    renderPPPresets();
+    updatePPFooter();
+    return;
+  }
+  PP_STATE.currentPreset = value;
+  PP_STATE.startDate = null;
+  PP_STATE.endDate = null;
+  renderPPPresets();
+  renderPPCals();
+  updatePPFooter();
+  // Auto-aplica presets fixos
+  applyPP();
+}
+
+function renderPPCals() {
+  renderOneCal('pp-cal-left',  PP_STATE.leftMonth);
+  renderOneCal('pp-cal-right', PP_STATE.rightMonth);
+}
+
+function renderOneCal(elId, month) {
+  var el = $(elId);
+  var side = elId.indexOf('left') >= 0 ? 'left' : 'right';
+  var y = month.getFullYear(), m = month.getMonth();
+  var today = new Date(); today.setHours(0,0,0,0);
+
+  var html = '<div class="pp-cal-header">' +
+    '<div class="pp-cal-nav">' +
+    '<button class="pp-nav-btn" onclick="navPPMonth('' + side + '',-1)">‹</button>' +
+    '</div>' +
+    '<div class="pp-cal-title">' + MONTH_NAMES[m] + ' ' + y + '</div>' +
+    '<div class="pp-cal-nav">' +
+    '<button class="pp-nav-btn" onclick="navPPMonth('' + side + '',1)">›</button>' +
+    '</div></div>';
+
+  html += '<div class="pp-cal-grid">';
+  DAY_NAMES.forEach(function(d) { html += '<div class="pp-day-header">' + d + '</div>'; });
+
+  var firstDay = new Date(y, m, 1).getDay();
+  var daysInMonth = new Date(y, m + 1, 0).getDate();
+  var daysInPrev = new Date(y, m, 0).getDate();
+
+  // Dias do mês anterior
+  for (var i = firstDay - 1; i >= 0; i--) {
+    var d2 = new Date(y, m - 1, daysInPrev - i);
+    html += ppDayHtml(d2, true, today);
+  }
+  // Dias do mês atual
+  for (var d3 = 1; d3 <= daysInMonth; d3++) {
+    var dt = new Date(y, m, d3);
+    html += ppDayHtml(dt, false, today);
+  }
+  // Completar grade
+  var total = firstDay + daysInMonth;
+  var remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (var d4 = 1; d4 <= remaining; d4++) {
+    var dt2 = new Date(y, m + 1, d4);
+    html += ppDayHtml(dt2, true, today);
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function ppDayHtml(dt, otherMonth, today) {
+  dt.setHours(0,0,0,0);
+  var isFuture = dt > today;
+  var cls = 'pp-day';
+  if (otherMonth) cls += ' other-month';
+  if (isFuture) cls += ' disabled';
+  if (dt.getTime() === today.getTime()) cls += ' today';
+
+  var ts = dt.getTime();
+  var startTs = PP_STATE.startDate ? PP_STATE.startDate.getTime() : null;
+  var endTs   = PP_STATE.endDate   ? PP_STATE.endDate.getTime()   : null;
+
+  if (startTs && ts === startTs) cls += ' selected-start in-range';
+  if (endTs   && ts === endTs)   cls += ' selected-end in-range';
+  if (startTs && endTs && ts > startTs && ts < endTs) cls += ' in-range';
+
+  var iso = dt.getFullYear() + '-' + pad(dt.getMonth()+1) + '-' + pad(dt.getDate());
+  var onclick = isFuture ? '' : 'onclick="ppClickDay('' + iso + '')"';
+  return '<div class="' + cls + '" ' + onclick + '>' + dt.getDate() + '</div>';
+}
+
+function ppClickDay(iso) {
+  var dt = new Date(iso + 'T00:00:00');
+  PP_STATE.currentPreset = 'custom';
+  if (PP_STATE.selecting === 'start' || (PP_STATE.startDate && PP_STATE.endDate)) {
+    PP_STATE.startDate = dt;
+    PP_STATE.endDate = null;
+    PP_STATE.selecting = 'end';
+  } else {
+    if (dt < PP_STATE.startDate) {
+      PP_STATE.endDate = PP_STATE.startDate;
+      PP_STATE.startDate = dt;
+    } else {
+      PP_STATE.endDate = dt;
+    }
+    PP_STATE.selecting = 'start';
+  }
+  renderPPPresets();
+  renderPPCals();
+  updatePPFooter();
+}
+
+function navPPMonth(side, dir) {
+  if (side === 'left') {
+    PP_STATE.leftMonth = new Date(PP_STATE.leftMonth.getFullYear(), PP_STATE.leftMonth.getMonth() + dir, 1);
+    // Sincroniza right = left + 1
+    PP_STATE.rightMonth = new Date(PP_STATE.leftMonth.getFullYear(), PP_STATE.leftMonth.getMonth() + 1, 1);
+  } else {
+    PP_STATE.rightMonth = new Date(PP_STATE.rightMonth.getFullYear(), PP_STATE.rightMonth.getMonth() + dir, 1);
+    PP_STATE.leftMonth = new Date(PP_STATE.rightMonth.getFullYear(), PP_STATE.rightMonth.getMonth() - 1, 1);
+  }
+  renderPPCals();
+}
+
+function updatePPFooter() {
+  var lbl = $('pp-range-label');
+  var applyBtn = $('pp-apply-btn');
+  if (PP_STATE.currentPreset !== 'custom') {
+    lbl.textContent = presetToLabel(PP_STATE.currentPreset);
+    applyBtn.disabled = false;
+    return;
+  }
+  if (PP_STATE.startDate && PP_STATE.endDate) {
+    var since = fmtDate(PP_STATE.startDate);
+    var until = fmtDate(PP_STATE.endDate);
+    var days = Math.round((PP_STATE.endDate - PP_STATE.startDate) / 86400000) + 1;
+    lbl.textContent = since.split('-').reverse().join('/') + ' → ' + until.split('-').reverse().join('/') + ' (' + days + ' dias)';
+    applyBtn.disabled = false;
+    PP_STATE.customSince = since;
+    PP_STATE.customUntil = until;
+  } else if (PP_STATE.startDate) {
+    lbl.textContent = 'Selecione a data final...';
+    applyBtn.disabled = true;
+  } else {
+    lbl.textContent = 'Clique para selecionar início';
+    applyBtn.disabled = true;
+  }
+}
+
+function applyPP() {
+  var ctx = PP_STATE.context;
+  if (!ctx) { closePP(); return; }
+
+  if (PP_STATE.currentPreset !== 'custom') {
+    PRESET = PP_STATE.currentPreset;
+    PP_STATE.customSince = null;
+    PP_STATE.customUntil = null;
+    var lbl = presetToLabel(PRESET);
+    setText('pp-' + ctx + '-label', lbl);
+    if (ctx === 'accounts') setText('pp-detail-label', lbl);
+    else setText('pp-accounts-label', lbl);
+  } else {
+    PRESET = 'custom';
+    var since = PP_STATE.customSince;
+    var until = PP_STATE.customUntil;
+    var lbl2 = since.split('-').reverse().slice(0,2).join('/') + ' → ' + until.split('-').reverse().slice(0,2).join('/');
+    setText('pp-' + ctx + '-label', lbl2);
+    if (ctx === 'accounts') setText('pp-detail-label', lbl2);
+    else setText('pp-accounts-label', lbl2);
+  }
+
+  closePP();
+  if (ctx === 'accounts' && META_TOKEN) fetchAccounts();
+  if (ctx === 'detail' && ACCOUNT) loadDetail(ACCOUNT);
+}
+
+// Fecha ao clicar fora
+document.addEventListener('click', function(e) {
+  var dd = $('pp-dropdown');
+  if (!dd || dd.style.display === 'none') return;
+  if (e.target.closest('.pp-dropdown') || e.target.closest('.period-picker')) return;
+  closePP();
+});
+
 // ══ SALDOS ════════════════════════════════════════════════════════════════
 var ALL_SALDOS = [];
 var SALDO_SORT = 'saldo';
@@ -806,7 +1172,13 @@ function apiFetch(url) {
 var INSIGHT_FIELDS = 'spend,impressions,reach,clicks,ctr,cpc,cpm,frequency,actions,cost_per_action_type';
 
 function fetchInsights(id, preset) {
-  var url = BASE + '/' + id + '/insights?fields=' + INSIGHT_FIELDS + '&date_preset=' + preset + '&access_token=' + META_TOKEN;
+  var url;
+  if (preset === 'custom' && PP_STATE.customSince && PP_STATE.customUntil) {
+    url = BASE + '/' + id + '/insights?fields=' + INSIGHT_FIELDS + '&time_range={"since":"' + PP_STATE.customSince + '","until":"' + PP_STATE.customUntil + '"}&access_token=' + META_TOKEN;
+  } else {
+    var p = (preset === 'custom') ? 'last_30d' : preset;
+    url = BASE + '/' + id + '/insights?fields=' + INSIGHT_FIELDS + '&date_preset=' + p + '&access_token=' + META_TOKEN;
+  }
   return apiFetch(url).then(function(d) { return d.data && d.data[0] ? d.data[0] : null; });
 }
 function fetchPrevInsights(id, preset) {
@@ -853,7 +1225,6 @@ function doLogin() {
   var sl = document.getElementById('screen-login'); sl.style.display='none'; sl.classList.remove('active'); show('screen-accounts');
   ALL_SALDOS = []; // reseta saldos ao fazer login
   setText('topbar-username', user.name);
-  $('period-accounts').value = PRESET;
   updateTokenStatus();
   if (!META_TOKEN) { showEl('no-token-warn'); showEl('threshold-bar',false); }
   else { showEl('no-token-warn',false); showEl('threshold-bar'); fetchAccounts(); }
@@ -885,7 +1256,7 @@ $('btn-modal-save').onclick = function() {
 };
 
 // ══ CONTAS ════════════════════════════════════════════════════════════════
-$('period-accounts').onchange = function(e) { PRESET=e.target.value; if (META_TOKEN) fetchAccounts(); };
+// period-accounts agora é controlado pelo period picker
 $('ac-search').addEventListener('input', function() { renderAccountGrid(ALL_ACCOUNTS); });
 
 function fetchAccounts() {
@@ -991,6 +1362,12 @@ $('btn-back').onclick=function(){hide('screen-detail');show('screen-accounts');}
 $('period-detail').onchange=function(e){PRESET=e.target.value;if(ACCOUNT)loadDetail(ACCOUNT);};
 
 function openAccount(ac) {
+  ADSETS=[]; ADSETS_LOADED=false; CONJ_FILTER='ALL';
+  CURRENT_DETAIL_TAB='campanhas';
+  document.getElementById('tab-content-campanhas').style.display='';
+  document.getElementById('tab-content-conjuntos').style.display='none';
+  document.getElementById('tab-campanhas').className='detail-tab active';
+  document.getElementById('tab-conjuntos').className='detail-tab';
   ACCOUNT=ac; PRESET=$('period-accounts').value;
   hide('screen-accounts'); show('screen-detail');
   $('period-detail').value=PRESET; setText('detail-title',ac.name); loadDetail(ac);
@@ -1059,6 +1436,145 @@ function renderMetrics(ins, prev, currency) {
   }).join('');
 }
 
+// ── TABS ──────────────────────────────────────────────────────────────────
+var CURRENT_DETAIL_TAB = 'campanhas';
+var ADSETS = [];
+var ADSETS_LOADED = false;
+var CONJ_FILTER = 'ALL';
+
+function switchDetailTab(tab) {
+  CURRENT_DETAIL_TAB = tab;
+  document.getElementById('tab-content-campanhas').style.display = tab === 'campanhas' ? '' : 'none';
+  document.getElementById('tab-content-conjuntos').style.display = tab === 'conjuntos' ? '' : 'none';
+  document.getElementById('tab-campanhas').className = 'detail-tab' + (tab === 'campanhas' ? ' active' : '');
+  document.getElementById('tab-conjuntos').className = 'detail-tab' + (tab === 'conjuntos' ? ' active' : '');
+  if (tab === 'conjuntos' && !ADSETS_LOADED && ACCOUNT) loadAdsets(ACCOUNT);
+}
+
+function loadAdsets(ac) {
+  ADSETS = []; ADSETS_LOADED = false;
+  showEl('conj-loading');
+  document.getElementById('conj-tbody').innerHTML = '';
+  setText('conj-count', '—');
+
+  apiFetch(BASE + '/' + ac.id + '/adsets?fields=name,status,campaign_id,daily_budget,lifetime_budget,bid_amount&limit=200&access_token=' + META_TOKEN)
+    .then(function(d) {
+      var adsets = d.data || [];
+      var total = adsets.length, done = 0;
+      // Busca campanha para cada adset
+      var campMap = {};
+      CAMPAIGNS.forEach(function(c) { campMap[c.id] = c.name; });
+
+      return Promise.all(adsets.map(function(as) {
+        return fetchInsights(as.id, PRESET).then(function(ins) {
+          done++;
+          var result = ins ? getMainResult(ins) : null;
+          ADSETS.push(Object.assign({}, as, {
+            insights: ins,
+            result: result,
+            campaignName: campMap[as.campaign_id] || '—'
+          }));
+        }).catch(function() { done++; });
+      }));
+    })
+    .then(function() {
+      ADSETS_LOADED = true;
+      showEl('conj-loading', false);
+      renderAdsets();
+    })
+    .catch(function(e) {
+      showEl('conj-loading', false);
+      document.getElementById('conj-tbody').innerHTML = '<tr><td colspan="10" class="empty">' + e.message + '</td></tr>';
+    });
+}
+
+function renderAdsets() {
+  // Filtra sem gasto e por status
+  var list = ADSETS.filter(function(as) {
+    var hasSpend = as.insights && parseFloat(as.insights.spend || 0) > 0;
+    var statusOk = CONJ_FILTER === 'ALL' || as.status === CONJ_FILTER;
+    return hasSpend && statusOk;
+  });
+
+  // Ordena por resultado (maior primeiro)
+  list.sort(function(a, b) {
+    var av = a.result ? a.result.value : 0;
+    var bv = b.result ? b.result.value : 0;
+    return bv - av;
+  });
+
+  setText('conj-count', list.length + ' conjunto' + (list.length !== 1 ? 's' : '') + ' com gasto');
+
+  var currency = ACCOUNT && ACCOUNT.currency ? ACCOUNT.currency : 'BRL';
+
+  if (!list.length) {
+    document.getElementById('conj-tbody').innerHTML = '<tr><td colspan="10" class="empty">Nenhum conjunto com gasto no período.</td></tr>';
+    document.getElementById('conj-tfoot').innerHTML = '';
+    return;
+  }
+
+  document.getElementById('conj-tbody').innerHTML = list.map(function(as) {
+    var ins = as.insights;
+    var r = as.result;
+    var spend = ins ? parseFloat(ins.spend || 0) : 0;
+    var budget = as.daily_budget ? parseFloat(as.daily_budget) / 100 : (as.lifetime_budget ? parseFloat(as.lifetime_budget) / 100 : null);
+    var budgetLabel = as.daily_budget ? fmt(parseFloat(as.daily_budget)/100, 'currency', currency) + '/dia' : (as.lifetime_budget ? fmt(parseFloat(as.lifetime_budget)/100, 'currency', currency) + ' total' : '—');
+    var freq = ins ? parseFloat(ins.frequency || 0) : 0;
+    var freqCls = freq > 3 ? 'freq-warn' : 'freq-ok';
+
+    // Pct do orçamento usado
+    var pct = (budget && spend) ? Math.min(Math.round((spend / budget) * 100), 100) : 0;
+    var barOver = pct >= 95;
+
+    // Cor do custo por resultado
+    var costCls = '';
+    if (r && r.cost !== null) {
+      // Heurística: se custo < média da conta, verde; se > 150% média, vermelho
+      costCls = 'cost-ok';
+    }
+
+    return '<tr>' +
+      '<td class="td-name" title="' + as.name + '">' + as.name + '</td>' +
+      '<td style="font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + as.campaignName + '">' + as.campaignName + '</td>' +
+      '<td>' + makeBadge(as.status) + '</td>' +
+      '<td class="r td-result">' + (r ? fmt(r.value, 'int') + '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + r.label + '</div>' : '—') + '</td>' +
+      '<td class="r td-cost ' + costCls + '">' + (r && r.cost !== null ? fmt(r.cost, 'currency', currency) : '—') + '</td>' +
+      '<td class="r">' + (ins ? fmt(ins.reach, 'int') : '—') + '</td>' +
+      '<td class="r ' + freqCls + '">' + (ins && freq ? freq.toFixed(2) : '—') + '</td>' +
+      '<td class="r td-budget">' + budgetLabel + '<div class="budget-bar"><div class="budget-bar-fill' + (barOver ? ' over' : '') + '" style="width:' + pct + '%"></div></div></td>' +
+      '<td class="r">' + fmt(spend, 'currency', currency) + '</td>' +
+      '<td class="r">' + (ins ? fmt(ins.impressions, 'int') : '—') + '</td>' +
+      '</tr>';
+  }).join('');
+
+  // Totais
+  var ts = list.reduce(function(s, as) { return s + (as.insights ? parseFloat(as.insights.spend || 0) : 0); }, 0);
+  var tr2 = list.reduce(function(s, as) { return s + (as.result ? as.result.value : 0); }, 0);
+  document.getElementById('conj-tfoot').innerHTML = '<tr>' +
+    '<td style="color:var(--muted)">Total</td><td></td><td></td>' +
+    '<td class="r" style="color:var(--text);font-weight:500">' + fmt(tr2, 'int') + '</td>' +
+    '<td class="r" style="color:var(--text)">' + (tr2 > 0 ? fmt(ts / tr2, 'currency', currency) : '—') + '</td>' +
+    '<td colspan="3"></td>' +
+    '<td class="r" style="color:var(--text);font-weight:500">' + fmt(ts, 'currency', currency) + '</td>' +
+    '<td></td></tr>';
+}
+
+// Filtros conjuntos
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.conj-filter').forEach(function(btn) {
+    btn.onclick = function() {
+      document.querySelectorAll('.conj-filter').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      CONJ_FILTER = btn.dataset.status;
+      if (ADSETS_LOADED) renderAdsets();
+    };
+  });
+});
+
+// Reseta tab ao trocar de conta
+var _origOpenAccount = openAccount;
+
+// ── FILTROS CAMPANHAS ──────────────────────────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(function(btn) {
   btn.onclick=function() {
     document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
