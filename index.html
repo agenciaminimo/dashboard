@@ -559,10 +559,15 @@ function closePP() {
 }
 
 function renderPPPresets() {
-  $('pp-presets-list').innerHTML = PP_PRESETS.map(function(p) {
-    var active = PP_STATE.currentPreset === p.value ? ' active' : '';
-    return '<button class="pp-preset' + active + '" onclick="selectPPPreset('' + p.value + '')">' + p.label + '</button>';
-  }).join('');
+  var list = $('pp-presets-list');
+  list.innerHTML = '';
+  PP_PRESETS.forEach(function(p) {
+    var btn = document.createElement('button');
+    btn.className = 'pp-preset' + (PP_STATE.currentPreset === p.value ? ' active' : '');
+    btn.textContent = p.label;
+    btn.onclick = function() { selectPPPreset(p.value); };
+    list.appendChild(btn);
+  });
 }
 
 function selectPPPreset(value) {
@@ -595,65 +600,41 @@ function renderOneCal(elId, month) {
   var side = elId.indexOf('left') >= 0 ? 'left' : 'right';
   var y = month.getFullYear(), m = month.getMonth();
   var today = new Date(); today.setHours(0,0,0,0);
-
-  var html = '<div class="pp-cal-header">' +
-    '<div class="pp-cal-nav">' +
-    '<button class="pp-nav-btn" onclick="navPPMonth('' + side + '',-1)">‹</button>' +
-    '</div>' +
-    '<div class="pp-cal-title">' + MONTH_NAMES[m] + ' ' + y + '</div>' +
-    '<div class="pp-cal-nav">' +
-    '<button class="pp-nav-btn" onclick="navPPMonth('' + side + '',1)">›</button>' +
-    '</div></div>';
-
-  html += '<div class="pp-cal-grid">';
-  DAY_NAMES.forEach(function(d) { html += '<div class="pp-day-header">' + d + '</div>'; });
-
-  var firstDay = new Date(y, m, 1).getDay();
-  var daysInMonth = new Date(y, m + 1, 0).getDate();
-  var daysInPrev = new Date(y, m, 0).getDate();
-
-  // Dias do mês anterior
-  for (var i = firstDay - 1; i >= 0; i--) {
-    var d2 = new Date(y, m - 1, daysInPrev - i);
-    html += ppDayHtml(d2, true, today);
+  var header = document.createElement('div');
+  header.className = 'pp-cal-header';
+  var navL = document.createElement('div'); navL.className = 'pp-cal-nav';
+  var btnP = document.createElement('button'); btnP.className = 'pp-nav-btn'; btnP.textContent = '<';
+  (function(s){ btnP.onclick = function(){ navPPMonth(s,-1); }; })(side);
+  navL.appendChild(btnP);
+  var titleEl = document.createElement('div'); titleEl.className = 'pp-cal-title';
+  titleEl.textContent = MONTH_NAMES[m] + ' ' + y;
+  var navR = document.createElement('div'); navR.className = 'pp-cal-nav';
+  var btnN = document.createElement('button'); btnN.className = 'pp-nav-btn'; btnN.textContent = '>';
+  (function(s){ btnN.onclick = function(){ navPPMonth(s,1); }; })(side);
+  navR.appendChild(btnN);
+  header.appendChild(navL); header.appendChild(titleEl); header.appendChild(navR);
+  var grid = document.createElement('div'); grid.className = 'pp-cal-grid';
+  DAY_NAMES.forEach(function(d){ var dh=document.createElement('div'); dh.className='pp-day-header'; dh.textContent=d; grid.appendChild(dh); });
+  var firstDay=new Date(y,m,1).getDay(), daysInMonth=new Date(y,m+1,0).getDate(), daysInPrev=new Date(y,m,0).getDate();
+  function addDay(dt,other) {
+    var dd=new Date(dt); dd.setHours(0,0,0,0);
+    var isFuture=dd>today;
+    var cls='pp-day'+(other?' other-month':'')+(isFuture?' disabled':'')+(dd.getTime()===today.getTime()?' today':'');
+    var ts=dd.getTime(),sTs=PP_STATE.startDate?PP_STATE.startDate.getTime():null,eTs=PP_STATE.endDate?PP_STATE.endDate.getTime():null;
+    if(sTs&&ts===sTs) cls+=' selected-start in-range';
+    if(eTs&&ts===eTs) cls+=' selected-end in-range';
+    if(sTs&&eTs&&ts>sTs&&ts<eTs) cls+=' in-range';
+    var cell=document.createElement('div'); cell.className=cls; cell.textContent=dd.getDate();
+    if(!isFuture){var iso=dd.getFullYear()+'-'+pad(dd.getMonth()+1)+'-'+pad(dd.getDate());(function(d){cell.onclick=function(){ppClickDay(d);};})(iso);}
+    grid.appendChild(cell);
   }
-  // Dias do mês atual
-  for (var d3 = 1; d3 <= daysInMonth; d3++) {
-    var dt = new Date(y, m, d3);
-    html += ppDayHtml(dt, false, today);
-  }
-  // Completar grade
-  var total = firstDay + daysInMonth;
-  var remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
-  for (var d4 = 1; d4 <= remaining; d4++) {
-    var dt2 = new Date(y, m + 1, d4);
-    html += ppDayHtml(dt2, true, today);
-  }
-
-  html += '</div>';
-  el.innerHTML = html;
+  for(var i=firstDay-1;i>=0;i--) addDay(new Date(y,m-1,daysInPrev-i),true);
+  for(var d3=1;d3<=daysInMonth;d3++) addDay(new Date(y,m,d3),false);
+  var tot=firstDay+daysInMonth,rem=tot%7===0?0:7-(tot%7);
+  for(var d4=1;d4<=rem;d4++) addDay(new Date(y,m+1,d4),true);
+  el.innerHTML=''; el.appendChild(header); el.appendChild(grid);
 }
 
-function ppDayHtml(dt, otherMonth, today) {
-  dt.setHours(0,0,0,0);
-  var isFuture = dt > today;
-  var cls = 'pp-day';
-  if (otherMonth) cls += ' other-month';
-  if (isFuture) cls += ' disabled';
-  if (dt.getTime() === today.getTime()) cls += ' today';
-
-  var ts = dt.getTime();
-  var startTs = PP_STATE.startDate ? PP_STATE.startDate.getTime() : null;
-  var endTs   = PP_STATE.endDate   ? PP_STATE.endDate.getTime()   : null;
-
-  if (startTs && ts === startTs) cls += ' selected-start in-range';
-  if (endTs   && ts === endTs)   cls += ' selected-end in-range';
-  if (startTs && endTs && ts > startTs && ts < endTs) cls += ' in-range';
-
-  var iso = dt.getFullYear() + '-' + pad(dt.getMonth()+1) + '-' + pad(dt.getDate());
-  var onclick = isFuture ? '' : 'onclick="ppClickDay('' + iso + '')"';
-  return '<div class="' + cls + '" ' + onclick + '>' + dt.getDate() + '</div>';
-}
 
 function ppClickDay(iso) {
   var dt = new Date(iso + 'T00:00:00');
