@@ -315,9 +315,9 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
         </div>
         <div style="display:flex;gap:4px">
           <button class="btn btn-ghost btn-sm" id="fsAll" onclick="setStatusFilter2('all')" style="font-size:11px">Todos status</button>
-          <button class="btn btn-ghost btn-sm" id="fsStable" onclick="setStatusFilter2('stable')" style="font-size:11px;color:#22c55e;border-color:rgba(34,197,94,.3)">Estável</button>
-          <button class="btn btn-ghost btn-sm" id="fsMonitor" onclick="setStatusFilter2('monitor')" style="font-size:11px;color:#f59e0b;border-color:rgba(245,158,11,.3)">Monitorar</button>
-          <button class="btn btn-ghost btn-sm" id="fsAlert" onclick="setStatusFilter2('alert')" style="font-size:11px;color:#ef4444;border-color:rgba(239,68,68,.3)">Alerta</button>
+          <button class="btn btn-ghost btn-sm" id="fsStable" onclick="setStatusFilter2('estavel')" style="font-size:11px;color:#22c55e;border-color:rgba(34,197,94,.3)">Estável</button>
+          <button class="btn btn-ghost btn-sm" id="fsMonitor" onclick="setStatusFilter2('monitorar')" style="font-size:11px;color:#f59e0b;border-color:rgba(245,158,11,.3)">Monitorar</button>
+          <button class="btn btn-ghost btn-sm" id="fsAlert" onclick="setStatusFilter2('alerta')" style="font-size:11px;color:#ef4444;border-color:rgba(239,68,68,.3)">Alerta</button>
         </div>
       </div>
       <div class="tbar">
@@ -614,14 +614,14 @@ function getAcStatus(acId) { return localStorage.getItem(acStatusKey(acId)) || '
 function setAcStatus(acId, status) { localStorage.setItem(acStatusKey(acId), status); }
 
 var STATUS_CFG = {
-  stable:  { label:'Estável',  color:'#22c55e', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.3)'   },
-  monitor: { label:'Monitorar',color:'#f59e0b', bg:'rgba(245,158,11,.12)',  border:'rgba(245,158,11,.3)'  },
-  alert:   { label:'Alerta',   color:'#ef4444', bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.3)'   }
+  estavel:   { label:'Estável',  color:'#22c55e', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.3)'   },
+  monitorar: { label:'Monitorar',color:'#f59e0b', bg:'rgba(245,158,11,.12)',  border:'rgba(245,158,11,.3)'  },
+  alerta:    { label:'Alerta',   color:'#ef4444', bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.3)'   }
 };
 
 function statusBadgeHtml(acId, editable) {
   var s = getAcStatus(acId);
-  var cfg = STATUS_CFG[s];
+  var cfg = STATUS_CFG[s] || STATUS_CFG['monitorar'];
   if (!editable) {
     return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;background:'+cfg.bg+';color:'+cfg.color+';border:1px solid '+cfg.border+'">'+cfg.label+'</span>';
   }
