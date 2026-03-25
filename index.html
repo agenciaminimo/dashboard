@@ -296,7 +296,26 @@ tfoot td{padding:11px 14px;font-size:12px;font-variant-numeric:tabular-nums}
           <div class="swrap"><span class="sicon">⌕</span><input type="text" id="acSearch" placeholder="Buscar conta..."></div>
         </div>
       </div>
-      <div class="tbar">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" id="fAll" onclick="setMgrFilter('all')" style="font-size:11px">Todos</button>
+          <button class="btn btn-ghost btn-sm" id="fEdiel" onclick="setMgrFilter('ediel')" style="font-size:11px;border-color:rgba(167,139,250,.4);color:#a78bfa">E Ediel</button>
+          <button class="btn btn-ghost btn-sm" id="fRafael" onclick="setMgrFilter('rafael')" style="font-size:11px;border-color:rgba(96,165,250,.4);color:#60a5fa">R Rafael</button>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" id="fsAll" onclick="setStatusFilter2('all')" style="font-size:11px">Todos status</button>
+          <button class="btn btn-ghost btn-sm" id="fsStable" onclick="setStatusFilter2('stable')" style="font-size:11px;color:#22c55e;border-color:rgba(34,197,94,.3)">Estável</button>
+          <button class="btn btn-ghost btn-sm" id="fsMonitor" onclick="setStatusFilter2('monitor')" style="font-size:11px;color:#f59e0b;border-color:rgba(245,158,11,.3)">Monitorar</button>
+          <button class="btn btn-ghost btn-sm" id="fsAlert" onclick="setStatusFilter2('alert')" style="font-size:11px;color:#ef4444;border-color:rgba(239,68,68,.3)">Alerta</button>
+        </div>
+      </div>
+      <div class="resp-filter-bar" id="respFilterBar">
+  <span>Responsável:</span>
+  <button class="rf-btn on" onclick="setRespFilter('all',this)">Todos</button>
+  <button class="rf-btn" onclick="setRespFilter('Ediel',this)">Ediel</button>
+  <button class="rf-btn" onclick="setRespFilter('Rafael',this)">Rafael</button>
+</div>
+<div class="tbar">
         <label>🔔 Alertar se resultado piorar mais de</label>
         <input type="range" id="thSlider" min="5" max="50" step="5" value="20">
         <span class="tbar-val" id="thVal">20%</span>
@@ -468,6 +487,172 @@ function getDisplayName(acName) {
   var info = getClientInfo(acName);
   return info ? info.name : acName;
 }
+
+
+// ══ RESPONSÁVEIS ════════════════════════════════════════════════════════
+var MANAGER_MAP = [
+  // EDIEL
+  {match:/casa.?do.?[oó]leo|acasadooleo/i,        mgr:'ediel'},
+  {match:/farm[aá]cia.?mcoelho/i,                  mgr:'ediel'},
+  {match:/imperatriz.?ilumina/i,                    mgr:'ediel'},
+  {match:/autoescola.?palho/i,                      mgr:'ediel'},
+  {match:/autosul.?seminov/i,                       mgr:'ediel'},
+  {match:/andressa.?nathalie/i,                     mgr:'ediel'},
+  {match:/sanpol/i,                                 mgr:'ediel'},
+  {match:/v4.?serral/i,                             mgr:'ediel'},
+  {match:/ac[aá]cio.?metalur/i,                    mgr:'ediel'},
+  {match:/epic.?iphone/i,                           mgr:'ediel'},
+  {match:/jett.?ve[ií]culos/i,                     mgr:'ediel'},
+  {match:/br.?machine/i,                            mgr:'ediel'},
+  {match:/paint.?is.?dead/i,                        mgr:'ediel'},
+  {match:/foxpay/i,                                 mgr:'ediel'},
+  {match:/fus[aã]o.?construtora/i,                 mgr:'ediel'},
+  {match:/floravita/i,                              mgr:'ediel'},
+  {match:/mello.?e.?rosa/i,                         mgr:'ediel'},
+  {match:/gramaria/i,                               mgr:'ediel'},
+  {match:/ar.?marinho/i,                            mgr:'ediel'},
+  {match:/ki.?alfajor/i,                            mgr:'ediel'},
+  {match:/flavored.?popcorn/i,                      mgr:'ediel'},
+  {match:/bluepack/i,                               mgr:'ediel'},
+  {match:/alex.?andrade/i,                          mgr:'ediel'},
+  // RAFAEL
+  {match:/alz.?construtora/i,                       mgr:'rafael'},
+  {match:/marcelo.?martins/i,                       mgr:'rafael'},
+  {match:/minimo|m[ií]nimo/i,                       mgr:'rafael'},
+  {match:/nathan.?despachante|despachante.?nathan/i,mgr:'rafael'},
+  {match:/d[eé]io.?autom/i,                         mgr:'rafael'},
+  {match:/m2tec/i,                                  mgr:'rafael'},
+  {match:/alysson.?mello/i,                         mgr:'rafael'},
+  {match:/kd.?empreend/i,                           mgr:'rafael'},
+  {match:/mla.?constru/i,                           mgr:'rafael'},
+  {match:/mla.?locadora/i,                          mgr:'rafael'},
+  {match:/iaa.?motors/i,                            mgr:'rafael'},
+  {match:/esy.?contabil/i,                          mgr:'rafael'},
+  {match:/vaapty/i,                                 mgr:'rafael'},
+  {match:/requintare/i,                             mgr:'rafael'},
+  {match:/agro.?comercial.?matos|agromatos/i,       mgr:'rafael'},
+  {match:/jn.?empreend/i,                           mgr:'rafael'},
+  {match:/village.?concept/i,                       mgr:'rafael'},
+  {match:/rafael.?starosky/i,                       mgr:'rafael'},
+  {match:/halze/i,                                  mgr:'rafael'},
+  {match:/278.?empreend/i,                          mgr:'rafael'},
+  {match:/auto.?sul/i,                              mgr:'rafael'},
+  {match:/enzo.?althoff/i,                          mgr:'rafael'},
+];
+
+var MANAGER_INFO = {
+  ediel:  { name:'Ediel',  color:'#a78bfa', bg:'rgba(167,139,250,.15)', initial:'E' },
+  rafael: { name:'Rafael', color:'#60a5fa', bg:'rgba(96,165,250,.15)',  initial:'R' }
+};
+
+function getManager(acName) {
+  for (var i=0; i<MANAGER_MAP.length; i++) {
+    if (MANAGER_MAP[i].match.test(acName)) return MANAGER_MAP[i].mgr;
+  }
+  return null;
+}
+
+// ══ STATUS DAS CONTAS (persistido em localStorage) ══════════════════════
+function acStatusKey(acId) { return 'ac_status_' + acId; }
+function getAcStatus(acId) { return localStorage.getItem(acStatusKey(acId)) || 'stable'; }
+function setAcStatus(acId, status) { localStorage.setItem(acStatusKey(acId), status); }
+
+var STATUS_CFG = {
+  stable:  { label:'Estável',  color:'#22c55e', bg:'rgba(34,197,94,.12)',   border:'rgba(34,197,94,.3)'   },
+  monitor: { label:'Monitorar',color:'#f59e0b', bg:'rgba(245,158,11,.12)',  border:'rgba(245,158,11,.3)'  },
+  alert:   { label:'Alerta',   color:'#ef4444', bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.3)'   }
+};
+
+function statusBadgeHtml(acId, editable) {
+  var s = getAcStatus(acId);
+  var cfg = STATUS_CFG[s];
+  if (!editable) {
+    return '<span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;background:'+cfg.bg+';color:'+cfg.color+';border:1px solid '+cfg.border+'">'+cfg.label+'</span>';
+  }
+  return '<div class="status-cycle" data-id="'+acId+'" style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:500;background:'+cfg.bg+';color:'+cfg.color+';border:1px solid '+cfg.border+';cursor:pointer;user-select:none" title="Clique para alterar">'+cfg.label+' <span style="font-size:9px;opacity:.6">▾</span></div>';
+}
+
+function cycleStatus(acId) {
+  var order = ['stable','monitor','alert'];
+  var cur = getAcStatus(acId);
+  var idx = order.indexOf(cur);
+  var next = order[(idx+1) % order.length];
+  setAcStatus(acId, next);
+  return next;
+}
+
+function mgrBadge(mgr) {
+  if (!mgr) return '';
+  var m = MANAGER_INFO[mgr];
+  return '<div style="width:22px;height:22px;border-radius:50%;background:'+m.bg+';border:1px solid '+m.color+'44;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:'+m.color+';flex-shrink:0" title="'+m.name+'">'+m.initial+'</div>';
+}
+
+
+// ══ RESPONSÁVEIS ════════════════════════════════════════════════════════
+var RESP_MAP = [
+  // EDIEL (foto no ClickUp)
+  {match:/casa do [oó]leo|acasadooleo/i,       resp:'Ediel'},
+  {match:/farm[aá]cia mcoelho/i,               resp:'Ediel'},
+  {match:/imperatriz ilumina/i,                resp:'Ediel'},
+  {match:/autoescola palho/i,                  resp:'Ediel'},
+  {match:/autosul seminovos/i,                 resp:'Ediel'},
+  {match:/andressa nathalie/i,                 resp:'Ediel'},
+  {match:/sanpol/i,                            resp:'Ediel'},
+  {match:/v4 serralheria/i,                    resp:'Ediel'},
+  {match:/ac[aá]cio metal/i,                   resp:'Ediel'},
+  {match:/epic iphone/i,                       resp:'Ediel'},
+  {match:/jett ve[ií]culos/i,                  resp:'Ediel'},
+  {match:/br machine/i,                        resp:'Ediel'},
+  {match:/paint is dead/i,                     resp:'Ediel'},
+  {match:/foxpay/i,                            resp:'Ediel'},
+  {match:/floravita/i,                         resp:'Ediel'},
+  {match:/enzo althoff/i,                      resp:'Ediel'},
+  // RAFAEL (RS no ClickUp)
+  {match:/alz construtora/i,                   resp:'Rafael'},
+  {match:/marcelo martins/i,                   resp:'Rafael'},
+  {match:/m[ií]nimo marketing|c3.*minimo/i,    resp:'Rafael'},
+  {match:/nathan despachante/i,                resp:'Rafael'},
+  {match:/d[eé]io autom/i,                     resp:'Rafael'},
+  {match:/m2tec/i,                             resp:'Rafael'},
+  {match:/alysson mello/i,                     resp:'Rafael'},
+  {match:/kd empreend/i,                       resp:'Rafael'},
+  {match:/mla constru/i,                       resp:'Rafael'},
+  {match:/mla locadora/i,                      resp:'Rafael'},
+  {match:/iaa motors/i,                        resp:'Rafael'},
+  {match:/esy contabil/i,                      resp:'Rafael'},
+  {match:/vaapty/i,                            resp:'Rafael'},
+  {match:/requintare/i,                        resp:'Rafael'},
+  {match:/agro.?comercial|agro.?matos/i,       resp:'Rafael'},
+  {match:/jn empreend/i,                       resp:'Rafael'},
+  {match:/village concept/i,                   resp:'Rafael'},
+  {match:/fus[aã]o construtora/i,              resp:'Rafael'},
+  {match:/278 empreend/i,                      resp:'Rafael'},
+  {match:/ki alfajor/i,                        resp:'Rafael'},
+  {match:/alex andrade/i,                      resp:'Rafael'},
+  {match:/auto sul repasse/i,                  resp:'Rafael'},
+  {match:/rafael starosky/i,                   resp:'Rafael'},
+];
+
+function getResp(acName) {
+  for (var i = 0; i < RESP_MAP.length; i++) {
+    if (RESP_MAP[i].match.test(acName)) return RESP_MAP[i].resp;
+  }
+  return null;
+}
+
+// ══ STATUS POR CONTA ═════════════════════════════════════════════════════
+// Salvo em localStorage: { acId: 'estavel'|'monitorar'|'alerta' }
+var AC_STATUS_KEY = 'ac_status_v1';
+function loadAcStatuses() {
+  try { return JSON.parse(localStorage.getItem(AC_STATUS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveAcStatus(acId, status) {
+  var s = loadAcStatuses(); s[acId] = status;
+  localStorage.setItem(AC_STATUS_KEY, JSON.stringify(s));
+}
+function getAcStatus(acId) { return loadAcStatuses()[acId] || 'monitorar'; }
+
+var ACTIVE_RESP_FILTER = 'all';
 
 // ══ ESTADO ════════════════════════════════════════════════════════════════
 var V='v20.0', BASE='https://graph.facebook.com/'+V;
@@ -772,7 +957,35 @@ function renderSaldos(){
 
 // ══ CLIENTES ══════════════════════════════════════════════════════════════
 $('thSlider').oninput=function(){ALERT_TH=parseInt(this.value);setText('thVal',ALERT_TH+'%');if(ALL_AC.length)renderAc(ALL_AC)};
+
+var MGR_FILTER = 'all';
+var STATUS_FILTER2 = 'all';
+
+function setMgrFilter(f) {
+  MGR_FILTER = f;
+  ['fAll','fEdiel','fRafael'].forEach(function(id){ var el=$(id); if(el) el.style.fontWeight='400' });
+  var active = f==='all'?'fAll':f==='ediel'?'fEdiel':'fRafael';
+  var el=$(active); if(el) el.style.fontWeight='600';
+  renderAc(ALL_AC);
+}
+function setStatusFilter2(f) {
+  STATUS_FILTER2 = f;
+  ['fsAll','fsStable','fsMonitor','fsAlert'].forEach(function(id){ var el=$(id); if(el) el.style.fontWeight='400' });
+  var map = {all:'fsAll',stable:'fsStable',monitor:'fsMonitor',alert:'fsAlert'};
+  var el=$(map[f]); if(el) el.style.fontWeight='600';
+  renderAc(ALL_AC);
+}
 $('acSearch').addEventListener('input',function(){renderAc(ALL_AC)});
+
+// Delegação para status-cycle nos cards de conta
+$('acGrid').addEventListener('click', function(e) {
+  var el = e.target.closest('.status-cycle');
+  if (!el) return;
+  e.stopPropagation();
+  var acId = el.dataset.id;
+  cycleStatus(acId);
+  renderAc(ALL_AC);
+});
 
 function fetchAc(){
   ALL_AC=[];hide('acErr');show('acProg');$('acPb').style.width='0%';setText('acPl','Aguarde...');
@@ -802,7 +1015,12 @@ function fetchAc(){
 
 function renderAc(acs){
   var q=($('acSearch').value||'').toLowerCase();
-  var list=q?acs.filter(function(a){return a.name.toLowerCase().indexOf(q)>=0}):acs;
+  var list=acs.filter(function(a){
+    var nameOk = !q || a.name.toLowerCase().indexOf(q)>=0 || getDisplayName(a.name).toLowerCase().indexOf(q)>=0;
+    var mgrOk  = MGR_FILTER==='all' || getManager(a.name)===MGR_FILTER;
+    var stOk   = STATUS_FILTER2==='all' || getAcStatus(a.id)===STATUS_FILTER2;
+    return nameOk && mgrOk && stOk;
+  });
   var alerts=0;
   setText('clientesSub',list.length+' conta'+(list.length!==1?'s':'')+' ativas no período');
   var g=$('acGrid');g.innerHTML='';
@@ -827,13 +1045,19 @@ function renderAc(acs){
       '<div class="cc-row"><div class="cc-spend">'+fmt(ins.spend,'cur',ac.currency)+'</div>'+acDelta(ds,true)+'</div>'+
       '<div class="cc-row"><div class="cc-kpi">'+(res?res.label:'Resultado')+': <span>'+(res?fmt(res.value,'int'):'—')+'</span></div>'+acDelta(dr,false)+'</div>'+
       '<div class="cc-row"><div class="cc-kpi">'+(res?res.costLabel:'Custo')+': <span>'+(res&&res.cost!==null?fmt(res.cost,'cur',ac.currency):'—')+'</span></div>'+acDelta(dc,true)+'</div>'+
-      '<div class="cc-sub"><span>'+(ac.currency||'BRL')+'</span><span>CTR '+fmt(ins.ctr,'pct')+'</span></div>'+
+      '<div class="cc-sub" style="align-items:center">'+
+        '<div style="display:flex;align-items:center;gap:5px">'+mgrBadge(getManager(ac.name))+'<span style="font-size:10px;color:var(--t3)">'+(getManager(ac.name)?MANAGER_INFO[getManager(ac.name)].name:'—')+'</span></div>'+
+        statusBadgeHtml(ac.id, true)+
+      '</div>'+
       (als.length?'<div class="astrip">'+als.join(' · ')+'</div>':'');
     (function(a){card.onclick=function(){openDetail(a)}})(ac);
     g.appendChild(card);
     if(sbList){
       var si=document.createElement('button');si.className='sb-item sb-client-item';si.id='sbc_'+ac.id;
-      var dn=getDisplayName(ac.name); si.innerHTML='<span class="sb-dot '+(ac.account_status===1?'on':'off')+'"></span><span style="overflow:hidden;text-overflow:ellipsis" title="'+ac.name+'">'+dn+'</span>';
+      var dn=getDisplayName(ac.name); var mgr=getManager(ac.name); var mgrColor=mgr?MANAGER_INFO[mgr].color:'var(--t3)';
+    si.innerHTML='<span class="sb-dot '+(ac.account_status===1?'on':'off')+'"></span>'+
+      '<span style="overflow:hidden;text-overflow:ellipsis;flex:1" title="'+ac.name+'">'+dn+'</span>'+
+      (mgr?'<span style="width:14px;height:14px;border-radius:50%;background:'+MANAGER_INFO[mgr].bg+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:'+mgrColor+';flex-shrink:0">'+MANAGER_INFO[mgr].initial+'</span>':'');
       (function(a){si.onclick=function(){openDetail(a)}})(ac);
       sbList.appendChild(si);
     }
@@ -1262,6 +1486,23 @@ function renderReport() {
     '</div>';
 
   $('rptContent').innerHTML = html2;
+}
+
+function statusLabel(s){ return s==='estavel'?'Estável':s==='alerta'?'Alerta':'Monitorar'; }
+function cycleStatus(e,acId,btn){
+  e.stopPropagation();
+  var order=['monitorar','estavel','alerta'];
+  var cur=getAcStatus(acId);
+  var next=order[(order.indexOf(cur)+1)%order.length];
+  saveAcStatus(acId,next);
+  btn.className='st-badge st-'+next;
+  btn.textContent=statusLabel(next);
+}
+function setRespFilter(resp,btn){
+  ACTIVE_RESP_FILTER=resp;
+  document.querySelectorAll('.rf-btn').forEach(function(b){b.className='rf-btn'});
+  btn.className='rf-btn '+(resp==='all'?'on':resp==='Ediel'?'on-e':'on-r');
+  renderAc(ALL_AC);
 }
 
 </script>
