@@ -511,9 +511,9 @@ var CLIENT_MAP = [
   {match:/halze/i,                     name:"Halze Construtora",            seg:"Imobiliário"},
   {match:/nathan despachante/i,        name:"Nathan Despachante",           seg:"Serviços"},
   {match:/alex andrade/i,              name:"Alex Andrade Imóveis",         seg:"Imobiliário"},
+  {match:/julia andrade/i, name:"Julia Andrade Imóveis", seg:"Imobiliário"},
   {match:/enzo althoff/i,              name:"Enzo Althoff",                 seg:"Outros"},
   {match:/minimo|m[ií]nimo/i,          name:"Mínimo Marketing",             seg:"Agência"},
-  {match:/luiz alt/i,                  name:"Luiz Altenburg",               seg:"Outros"},
   {match:/domus/i,                     name:"Domus",                        seg:"Imobiliário"},
   {match:/ki alfajor/i,                name:"Ki Alfajor SC",                seg:"Alimentos"},
   {match:/flavored popcorn/i,          name:"Flavored PopCorn",             seg:"Alimentos"},
@@ -561,7 +561,7 @@ var MANAGER_MAP = [
   {match:/jett.?ve[ií]culos/i,                     mgr:'ediel'},
   {match:/br.?machine/i,                            mgr:'ediel'},
   {match:/paint.?is.?dead/i,                        mgr:'ediel'},
-  {match:/foxpay/i,                                 mgr:'ediel'},
+  {match:/foxpay|fox.?pay/i, name:"Fox Pay", seg:"Fintech"},
   {match:/fus[aã]o.?construtora/i,                 mgr:'ediel'},
   {match:/floravita/i,                              mgr:'ediel'},
   {match:/mello.?e.?rosa/i,                         mgr:'ediel'},
@@ -653,7 +653,7 @@ var RESP_MAP = [
   {match:/autoescola palho/i,                  resp:'Ediel'},
   {match:/autosul seminovos/i,                 resp:'Ediel'},
   {match:/andressa nathalie/i,                 resp:'Ediel'},
-  {match:/studio andressa/i,                          mgr:'ediel'},
+  {match:/studio andressa|andressa nathalie/i, name:"Studio Andressa", seg:"Estética"},
   {match:/sanpol/i,                            resp:'Ediel'},
   {match:/v4 serralheria/i,                    resp:'Ediel'},
   {match:/ac[aá]cio metal/i,                   resp:'Ediel'},
@@ -661,8 +661,8 @@ var RESP_MAP = [
   {match:/jett ve[ií]culos/i,                  resp:'Ediel'},
   {match:/br machine/i,                        resp:'Ediel'},
   {match:/paint is dead/i,                     resp:'Ediel'},
-  {match:/foxpay|fox.?pay/i,                           mgr:'ediel'},
-  {match:/foxpay/i,                            resp:'Ediel'},
+  {match:/foxpay|fox.?pay/i, name:"Fox Pay", seg:"Fintech"},
+  {match:/foxpay|fox.?pay/i, name:"Fox Pay", seg:"Fintech"},
   {match:/floravita/i,                         resp:'Ediel'},
   {match:/enzo althoff/i,                      resp:'Ediel'},
   // RAFAEL (RS no ClickUp)
@@ -672,7 +672,7 @@ var RESP_MAP = [
   {match:/nathan despachante/i,                resp:'Rafael'},
   {match:/d[eé]io autom/i,                     resp:'Rafael'},
   {match:/m2tec/i,                             resp:'Rafael'},
-  {match:/alysson mello/i,                     resp:'Rafael'},
+  {match:/alysson mello|ca mello|c[a-z0-9]*.mello/i, name:"Alysson Melo", seg:"Automotivo"},
   {match:/kd empreend/i,                       resp:'Rafael'},
   {match:/mla constru/i,                       resp:'Rafael'},
   {match:/mla locadora/i,                      resp:'Rafael'},
@@ -682,11 +682,12 @@ var RESP_MAP = [
   {match:/requintare/i,                        resp:'Rafael'},
   {match:/agro.?comercial|agro.?matos/i,       resp:'Rafael'},
   {match:/jn empreend/i,                       resp:'Rafael'},
-  {match:/village concept/i,                   resp:'Rafael'},
+  {match:/village concept/i, name:"Village Concept Bar", seg:"Entretenimento"},
   {match:/fus[aã]o construtora/i,              resp:'Rafael'},
   {match:/278 empreend/i,                      resp:'Rafael'},
   {match:/ki alfajor/i,                        resp:'Rafael'},
   {match:/alex andrade/i,                      resp:'Rafael'},
+    {match:/julia andrade/i,                            mgr:'rafael'},
   {match:/auto sul repasse/i,                  resp:'Rafael'},
   {match:/rafael starosky/i,                   resp:'Rafael'},
 ];
@@ -1315,11 +1316,21 @@ function togglePP(ctx){
   var btnId='pp'+ctx.charAt(0).toUpperCase()+ctx.slice(1)+'Btn';
   var btn=$(btnId);
   if(!btn){console.warn('PP btn not found:',btnId);return;}
-  var rect=btn.getBoundingClientRect();
+  // Posiciona o dropdown — usa timeout para garantir que o btn está renderizado
   dd.style.display='';
-  dd.style.top=(rect.bottom+6)+'px';
-  var left=rect.right-640;if(left<8)left=8;
-  dd.style.left=left+'px';
+  dd.style.top='-9999px'; dd.style.left='-9999px';
+  setTimeout(function(){
+    var rect=btn.getBoundingClientRect();
+    if(rect.width===0){
+      // Fallback: canto superior direito da tela
+      dd.style.top='60px';
+      dd.style.left=Math.max(8,(window.innerWidth||1200)-650)+'px';
+    } else {
+      dd.style.top=(rect.bottom+6)+'px';
+      var left=rect.right-640;if(left<8)left=8;
+      dd.style.left=left+'px';
+    }
+  }, 10);
   var now=new Date();
   PP.rm=new Date(now.getFullYear(),now.getMonth(),1);
   PP.lm=new Date(now.getFullYear(),now.getMonth()-1,1);
