@@ -653,6 +653,7 @@ var RESP_MAP = [
   {match:/autoescola palho/i,                  resp:'Ediel'},
   {match:/autosul seminovos/i,                 resp:'Ediel'},
   {match:/andressa nathalie/i,                 resp:'Ediel'},
+  {match:/studio andressa/i,                          mgr:'ediel'},
   {match:/sanpol/i,                            resp:'Ediel'},
   {match:/v4 serralheria/i,                    resp:'Ediel'},
   {match:/ac[aá]cio metal/i,                   resp:'Ediel'},
@@ -660,6 +661,7 @@ var RESP_MAP = [
   {match:/jett ve[ií]culos/i,                  resp:'Ediel'},
   {match:/br machine/i,                        resp:'Ediel'},
   {match:/paint is dead/i,                     resp:'Ediel'},
+  {match:/foxpay|fox.?pay/i,                           mgr:'ediel'},
   {match:/foxpay/i,                            resp:'Ediel'},
   {match:/floravita/i,                         resp:'Ediel'},
   {match:/enzo althoff/i,                      resp:'Ediel'},
@@ -1310,7 +1312,9 @@ function togglePP(ctx){
   var dd=$('ppDrop');
   if(dd.style.display!=='none'&&PP.ctx===ctx){closePP();return}
   PP.ctx=ctx;PP.sel='start';PP.start=null;PP.end=null;
-  var btn=$('pp'+ctx.charAt(0).toUpperCase()+ctx.slice(1)+'Btn');
+  var btnId='pp'+ctx.charAt(0).toUpperCase()+ctx.slice(1)+'Btn';
+  var btn=$(btnId);
+  if(!btn){console.warn('PP btn not found:',btnId);return;}
   var rect=btn.getBoundingClientRect();
   dd.style.display='';
   dd.style.top=(rect.bottom+6)+'px';
@@ -1404,8 +1408,31 @@ function applyPP(){
   if(lblEl) lblEl.textContent=lbl;
   closePP();
   if(ctx==='clientes'&&TOKEN){ALL_AC=[];fetchAc()}
+  if(ctx==='saldos'&&TOKEN){ALL_SALDOS=[];fetchSaldos()}
   if(ctx==='detail'&&ACCOUNT)loadDetail(ACCOUNT);
-  if(ctx==='gestor'&&GESTOR_ATIVO)renderGestor(GESTOR_ATIVO);
+  if(ctx==='gestor'&&GESTOR_ATIVO){
+    // Recarrega dados com novo período para o gestor
+    ALL_AC=[];
+    apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency&limit=200&access_token='+TOKEN)
+      .then(function(d){
+        var acs=d.data||[],total=acs.length,done=0,active=[],BATCH=8,batches=[];
+        for(var i=0;i<acs.length;i+=BATCH)batches.push(acs.slice(i,i+BATCH));
+        function rB(idx){
+          if(idx>=batches.length){
+            ALL_AC=active.sort(function(a,b){return parseFloat(b.ins.spend)-parseFloat(a.ins.spend)});
+            renderGestor(GESTOR_ATIVO);
+            return;
+          }
+          Promise.all(batches[idx].map(function(ac){
+            return Promise.all([fetchIns(ac.id,PRESET),fetchPrevIns(ac.id,PRESET)]).then(function(r){
+              done++;
+              if(r[0]&&parseFloat(r[0].spend||0)>0) active.push(Object.assign({},ac,{ins:r[0],prev:r[1]}));
+            }).catch(function(){done++});
+          })).then(function(){rB(idx+1)});
+        }
+        rB(0);
+      }).catch(function(e){console.error(e)});
+  }
 }
 document.addEventListener('click',function(e){
   var dd=$('ppDrop');
