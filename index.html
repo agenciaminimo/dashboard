@@ -1267,8 +1267,7 @@ $('threshold-slider').oninput = function() {
 };
 
 // ══ LOGIN ═════════════════════════════════════════════════════════════════
-$('btn-login').onclick = doLogin;
-$('login-pass').addEventListener('keydown', function(e) { if (e.key==='Enter') doLogin(); });
+// binding feito no DOMContentLoaded
 
 function doLogin() {
   var uid = $('login-user').value, pass = $('login-pass').value;
