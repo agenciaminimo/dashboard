@@ -1921,8 +1921,7 @@ function exportCSV(){
       delta !== null ? delta.toFixed(1).replace('.',',') : ''
     ]);
   });
-  var csv = rows.map(function(r){return r.join(';')}).join('
-');
+  var csv = rows.map(function(r){return r.join(';')}).join('\n');
   var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -2007,7 +2006,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(geralPh){
     var exportBtn = document.createElement('button');
     exportBtn.className = 'btn btn-sm';
-    exportBtn.style = 'gap:4px';
+    exportBtn.style.gap = '4px';
     exportBtn.innerHTML = '⬇ CSV';
     exportBtn.onclick = exportCSV;
     geralPh.querySelector('.pp-wrap') && geralPh.insertBefore(exportBtn, geralPh.querySelector('.pp-wrap'));
