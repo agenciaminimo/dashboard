@@ -1253,13 +1253,19 @@ function fetchSaldos(){
               // Média diária = gasto 30d / 30
               var daily = ins ? parseFloat(ins.spend||0) / 30 : 0;
               var days = (bal && bal > 0 && daily > 0) ? Math.floor(bal / daily) : null;
+              // Detecta tipo de pagamento via funding_source_details
+              var fsd = ac.funding_source_details;
+              var payType = fsd ? parseInt(fsd.type||0) : 0;
+              // type: 1=cartão crédito, 2=PayPal, 4=débito/banco, 8=saldo pré-pago, 16=crédito
+              var PAY_LABELS = {1:'Cartão de crédito',2:'PayPal',4:'Débito/banco',8:'Pré-pago',16:'Crédito Meta'};
+              var payLabel = PAY_LABELS[payType] || (payType>0?'Tipo '+payType:'Pré-pago');
+              var isCartao = (payType===1||payType===2||payType===4);
               if(ac.account_status===1)active.push({
                 id:ac.id, name:ac.name, cur:ac.currency||'BRL',
-                balance:bal,          // saldo disponível (capRestante ou balPrepago)
-                spendCap:spendCap/100,
-                amtSpent:amtSpent/100,
-                balPrepago:balPrepago,
-                isPost:isPost, daily:daily, days:days
+                balance:bal, spendCap:spendCap/100, amtSpent:amtSpent/100,
+                balPrepago:balPrepago, isPost:isPost, daily:daily, days:days,
+                payType:payType, payLabel:payLabel, isCartao:isCartao,
+                fsdDisplay: fsd ? (fsd.display_string||fsd.display_amount||'') : ''
               });
             })
             .catch(function(){done++;});
@@ -1287,13 +1293,14 @@ function renderSaldos(){
 
   txt('saldoCnt',pre.length+' conta'+(pre.length!==1?'s':'')+' pré-pagas'+(alerts.length?' · '+alerts.length+' alerta'+(alerts.length>1?'s':''):''));
 
+  var nCartao=list.filter(function(s){return s.isCartao}).length;
   E('saldoSum').innerHTML=[
-    {l:'Disponível total',     v:fmt(totalDisp,'cur'),   sub:'limite restante soma das contas'},
+    {l:'Disponível total',     v:fmt(totalDisp,'cur'),   sub:'soma dos limites restantes'},
     {l:'Total gasto',          v:fmt(totalGasto,'cur'),  sub:'amount spent acumulado'},
     {l:'Limite total',         v:totalCap>0?fmt(totalCap,'cur'):'—', sub:'spend cap total'},
-    {l:'Contas pré-pagas',     v:pre.length,             sub:'contas ativas'},
+    {l:'Contas pré-pagas',     v:pre.length,             sub:'com saldo/limite'},
+    {l:'Cartão de crédito',    v:nCartao,                sub:'contas pós-pagas'},
     {l:'Alertas ≤5 dias',      v:alerts.length,          sub:'requer atenção'},
-    {l:'Gasto/dia médio',      v:pre.length?fmt(pre.reduce(function(x,s){return x+s.daily},0)/pre.length,'cur'):'—', sub:'por conta (30d)'},
   ].map(function(x){
     return'<div class="ssumc"><div class="ssumb">'+x.l+'</div><div class="ssumv">'+x.v+'</div>'+
       (x.sub?'<div style="font-size:10px;color:var(--t3);margin-top:2px">'+x.sub+'</div>':'')+'</div>';
@@ -1321,7 +1328,7 @@ function renderSaldos(){
         '</div>'
       : (s.balPrepago?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Saldo pré-pago</div>':''))+
       '<div class="sc-meta">'+
-        '<span class="sc-tag">Pré-pago</span>'+
+        '<span class="sc-tag">'+(s.spendCap>0?'Limite restante':'Pré-pago')+'</span>'+
         '<span style="font-size:10px;color:var(--t3)">R$/dia '+fmt(s.daily,'cur',s.cur)+'</span>'+
       '</div>'+
       '<div class="sc-days">'+
@@ -1330,18 +1337,46 @@ function renderSaldos(){
       '</div>'+
       // Barra de progresso do limite (gasto%)
       '<div class="bbar"><div class="bf '+(pctUsado>90?'cr':pctUsado>75?'wn':'ok')+'" style="width:'+pctUsado+'%"></div></div>'+
-      '<div style="font-size:9px;color:var(--t3);text-align:right;margin-top:2px">'+pctUsado+'% do limite usado</div>';
+      '';
     g.appendChild(card);
   });
 
-  var post=list.filter(function(s){return s.isPost});
-  if(post.length){
-    var d=document.createElement('div');d.style='margin-top:20px';
-    d.innerHTML='<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">'+post.length+' contas pós-pagas / cartão</p>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
-      post.map(function(s){return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t3)">'+getDisplayName(s.name)+'</span>'}).join('')+
+  // Separa cartão de crédito de pós-pagas genéricas
+  var cartao=list.filter(function(s){return s.isCartao});
+  var semInfo=list.filter(function(s){return s.isPost&&!s.isCartao});
+
+  if(cartao.length){
+    var dc=document.createElement('div');dc.style='margin-top:24px';
+    dc.innerHTML=
+      '<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">'+
+        '💳 '+cartao.length+' conta'+(cartao.length>1?'s':'')+' — cartão de crédito / débito'+
+      '</p>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">'+
+      cartao.map(function(s){
+        var dn=getDisplayName(s.name);
+        var mgr=getMgr(s.name);
+        var mgrName=mgr==='ediel'?'Ediel':mgr==='rafael'?'Rafael':'—';
+        return'<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px">'+
+          '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px" title="'+s.name+'">'+dn+'</div>'+
+          (dn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
+          '<div style="display:flex;align-items:center;gap:6px;margin-top:6px">'+
+            '<span style="font-size:10px;background:rgba(96,165,250,.1);color:var(--blu);border:1px solid rgba(96,165,250,.2);padding:2px 8px;border-radius:20px">'+s.payLabel+'</span>'+
+            (s.fsdDisplay?'<span style="font-size:10px;color:var(--t3)">'+s.fsdDisplay+'</span>':'')+
+          '</div>'+
+          '<div style="font-size:11px;color:var(--t3);margin-top:6px">Gestor: '+mgrName+'</div>'+
+        '</div>';
+      }).join('')+
       '</div>';
-    g.appendChild(d);
+    g.appendChild(dc);
+  }
+
+  if(semInfo.length){
+    var ds=document.createElement('div');ds.style='margin-top:20px';
+    ds.innerHTML='<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">'+semInfo.length+' contas — tipo de pagamento não identificado</p>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
+      semInfo.map(function(s){return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t3)">'+getDisplayName(s.name)+'</span>'}).join('')+
+      '</div>';
+    g.appendChild(ds);
   }
 }
 
