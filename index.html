@@ -1278,105 +1278,138 @@ function fetchSaldos(){
 function renderSaldos(){
   var q=(E('saldoQ').value||'').toLowerCase();
   var list=ALL_SALDOS.filter(function(s){
-    return !q || s.name.toLowerCase().indexOf(q)>=0 || getDisplayName(s.name).toLowerCase().indexOf(q)>=0;
+    return !q||s.name.toLowerCase().indexOf(q)>=0||getDisplayName(s.name).toLowerCase().indexOf(q)>=0;
   });
   list=list.slice().sort(function(a,b){
     if(SALDO_SORT==='saldo'){if(a.isPost&&!b.isPost)return 1;if(!a.isPost&&b.isPost)return-1;return(a.balance||9999)-(b.balance||9999)}
     if(SALDO_SORT==='dias'){if(a.days===null&&b.days!==null)return 1;if(a.days!==null&&b.days===null)return-1;return(a.days||999)-(b.days||999)}
     return getDisplayName(a.name).localeCompare(getDisplayName(b.name));
   });
-  var pre=list.filter(function(s){return !s.isPost});
-  var alerts=pre.filter(function(s){return s.days!==null&&s.days<=5});
-  var totalDisp=pre.reduce(function(x,s){return x+(s.balance||0)},0);
-  var totalGasto=pre.reduce(function(x,s){return x+(s.amtSpent||0)},0);
-  var totalCap=pre.reduce(function(x,s){return x+(s.spendCap||0)},0);
 
-  txt('saldoCnt',pre.length+' conta'+(pre.length!==1?'s':'')+' pré-pagas'+(alerts.length?' · '+alerts.length+' alerta'+(alerts.length>1?'s':''):''));
+  // Separa: pré-pagas com saldo, cartão de crédito, sem info
+  var pre    = list.filter(function(s){return !s.isPost && !s.isCartao});
+  var cartao = list.filter(function(s){return s.isCartao});
+  var semInfo= list.filter(function(s){return s.isPost && !s.isCartao});
 
-  var nCartao=list.filter(function(s){return s.isCartao}).length;
+  var alerts  = pre.filter(function(s){return s.days!==null && s.days<=5});
+  var totalDisp = pre.reduce(function(x,s){return x+(s.balance||0)},0);
+  var totalGasto= pre.reduce(function(x,s){return x+(s.amtSpent||0)},0);
+  var totalCap  = pre.reduce(function(x,s){return x+(s.spendCap||0)},0);
+
+  txt('saldoCnt', pre.length+' conta'+(pre.length!==1?'s':'')+' pré-pagas · '+
+    (alerts.length?alerts.length+' alerta'+(alerts.length>1?'s':''):'sem alertas'));
+
+  // ── SUMMARY ──────────────────────────────────────────────────────────
   E('saldoSum').innerHTML=[
-    {l:'Disponível total',     v:fmt(totalDisp,'cur'),   sub:'soma dos limites restantes'},
-    {l:'Total gasto',          v:fmt(totalGasto,'cur'),  sub:'amount spent acumulado'},
-    {l:'Limite total',         v:totalCap>0?fmt(totalCap,'cur'):'—', sub:'spend cap total'},
-    {l:'Contas pré-pagas',     v:pre.length,             sub:'com saldo/limite'},
-    {l:'Cartão de crédito',    v:nCartao,                sub:'contas pós-pagas'},
-    {l:'Alertas ≤5 dias',      v:alerts.length,          sub:'requer atenção'},
+    {l:'Disponível total',   v:fmt(totalDisp,'cur'),           s:'soma dos saldos'},
+    {l:'Total gasto (30d)',  v:fmt(totalGasto,'cur'),          s:'acumulado no período'},
+    {l:'Limite total',       v:totalCap>0?fmt(totalCap,'cur'):'—', s:'spend cap'},
+    {l:'Contas com saldo',   v:pre.length,                     s:'pré-pagas ativas'},
+    {l:'Cartão de crédito',  v:cartao.length,                  s:'contas pós-pagas'},
+    {l:'Alertas ≤5 dias',    v:alerts.length,                  s:'requer atenção'},
   ].map(function(x){
-    return'<div class="ssumc"><div class="ssumb">'+x.l+'</div><div class="ssumv">'+x.v+'</div>'+
-      (x.sub?'<div style="font-size:10px;color:var(--t3);margin-top:2px">'+x.sub+'</div>':'')+'</div>';
+    return'<div class="ssumc"><div class="ssumb">'+x.l+'</div>'+
+      '<div class="ssumv" style="'+(x.l==='Alertas ≤5 dias'&&alerts.length>0?'color:var(--red)':'')+'">'+x.v+'</div>'+
+      '<div style="font-size:10px;color:var(--t3);margin-top:2px">'+x.s+'</div></div>';
   }).join('');
 
-  var g=E('saldoGrid');g.innerHTML='';
+  var g=E('saldoGrid'); g.innerHTML='';
+
+  // ── GRID PRÉ-PAGAS ────────────────────────────────────────────────────
   pre.forEach(function(s){
     var dn=getDisplayName(s.name);
-    // Cores baseadas no saldo disponível
-    var bc=s.balance===null?'':s.balance>1000?'hi':s.balance>400?'mi':s.balance>150?'lo':'cr';
+    // Cor do valor baseada nos dias restantes
+    var vc=s.days===null?'':s.days>10?'hi':s.days>5?'mi':s.days>2?'lo':'cr';
     var dc=s.days===null?'':s.days>10?'ok':s.days>5?'wn':'cr';
     var cc='sc'+(s.days!==null&&s.days<=3?' al':s.days!==null&&s.days<=5?' aw':'');
-    // % do limite já usado
     var pctUsado=(s.spendCap>0)?Math.min(100,Math.round((s.amtSpent/s.spendCap)*100)):0;
-    var card=document.createElement('div');card.className=cc;
+    var barCls=pctUsado>=90?'cr':pctUsado>=75?'wn':'ok';
+    var card=document.createElement('div'); card.className=cc;
     card.innerHTML=
       '<div class="sc-name" title="'+s.name+'">'+dn+'</div>'+
       (dn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-top:-8px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
-      '<div class="sa '+bc+'">'+fmt(s.balance,'cur',s.cur)+'</div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-top:2px;margin-bottom:6px">disponível (limite restante)</div>'+
-      (s.spendCap>0?
-        '<div style="font-size:10px;color:var(--t3);margin-bottom:6px">'+
-          'Gasto: '+fmt(s.amtSpent,'cur',s.cur)+' / Limite: '+fmt(s.spendCap,'cur',s.cur)+
-          ' <span style="color:'+(pctUsado>90?'var(--red)':pctUsado>75?'var(--ylw)':'var(--t3)')+';">('+pctUsado+'%)</span>'+
-        '</div>'
-      : (s.balPrepago?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Saldo pré-pago</div>':''))+
-      '<div class="sc-meta">'+
-        '<span class="sc-tag">'+(s.spendCap>0?'Limite restante':'Pré-pago')+'</span>'+
-        '<span style="font-size:10px;color:var(--t3)">R$/dia '+fmt(s.daily,'cur',s.cur)+'</span>'+
+      // Valor principal
+      '<div class="sa '+vc+'">'+fmt(s.balance,'cur',s.cur)+'</div>'+
+      '<div style="font-size:10px;color:var(--t3);margin-top:2px;margin-bottom:10px">disponível</div>'+
+      // Linha: tag + gasto diário
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+        '<span class="sc-tag">'+(s.payLabel||'Pré-pago')+'</span>'+
+        '<span style="font-size:11px;color:var(--t2)">'+fmt(s.daily,'cur',s.cur)+'/dia</span>'+
       '</div>'+
-      '<div class="sc-days">'+
+      // Estimativa
+      '<div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;margin-bottom:6px">'+
         '<span style="color:var(--t3)">Estimativa</span>'+
-        '<span class="dv '+dc+'">'+(s.days!==null?s.days+' dias':'—')+'</span>'+
+        '<span style="font-weight:500;color:'+(dc==='ok'?'var(--grn)':dc==='wn'?'var(--ylw)':dc==='cr'?'var(--red)':'var(--t2)')+'">'+(s.days!==null?s.days+(s.days===1?' dia':' dias'):'—')+'</span>'+
       '</div>'+
-      // Barra de progresso do limite (gasto%)
-      '<div class="bbar"><div class="bf '+(pctUsado>90?'cr':pctUsado>75?'wn':'ok')+'" style="width:'+pctUsado+'%"></div></div>'+
-      '';
+      // Barra % do limite usado (quanto já foi gasto do cap)
+      '<div class="bbar"><div class="bf '+barCls+'" style="width:'+pctUsado+'%"></div></div>'+
+      (s.spendCap>0?'<div style="font-size:9px;color:var(--t3);text-align:right;margin-top:2px">'+pctUsado+'% do limite</div>':'');
     g.appendChild(card);
   });
 
-  // Separa cartão de crédito de pós-pagas genéricas
-  var cartao=list.filter(function(s){return s.isCartao});
-  var semInfo=list.filter(function(s){return s.isPost&&!s.isCartao});
-
+  // ── SEÇÃO CARTÃO DE CRÉDITO ───────────────────────────────────────────
   if(cartao.length){
-    var dc=document.createElement('div');dc.style='margin-top:24px';
-    dc.innerHTML=
-      '<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">'+
-        '💳 '+cartao.length+' conta'+(cartao.length>1?'s':'')+' — cartão de crédito / débito'+
-      '</p>'+
-      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">'+
-      cartao.map(function(s){
-        var dn=getDisplayName(s.name);
-        var mgr=getMgr(s.name);
-        var mgrName=mgr==='ediel'?'Ediel':mgr==='rafael'?'Rafael':'—';
-        return'<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px">'+
-          '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px" title="'+s.name+'">'+dn+'</div>'+
-          (dn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
-          '<div style="display:flex;align-items:center;gap:6px;margin-top:6px">'+
-            '<span style="font-size:10px;background:rgba(96,165,250,.1);color:var(--blu);border:1px solid rgba(96,165,250,.2);padding:2px 8px;border-radius:20px">'+s.payLabel+'</span>'+
-            (s.fsdDisplay?'<span style="font-size:10px;color:var(--t3)">'+s.fsdDisplay+'</span>':'')+
-          '</div>'+
-          '<div style="font-size:11px;color:var(--t3);margin-top:6px">Gestor: '+mgrName+'</div>'+
+    var secDiv=document.createElement('div');
+    secDiv.style='margin-top:28px';
+    // Cabeçalho da seção
+    secDiv.innerHTML=
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'+
+        '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">'+
+          '<rect x="1" y="3" width="12" height="8" rx="1.5" stroke="var(--t2)" stroke-width="1.1"/>'+
+          '<line x1="1" y1="6" x2="13" y2="6" stroke="var(--t2)" stroke-width="1.1"/>'+
+          '<rect x="3" y="8" width="3" height="1.2" rx=".6" fill="var(--t2)"/>'+
+        '</svg>'+
+        '<span style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)">'+
+          cartao.length+' conta'+(cartao.length>1?'s':'')+' — cartão de crédito / débito'+
+        '</span>'+
+      '</div>'+
+      '<div id="cartaoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>';
+    g.appendChild(secDiv);
+
+    var cgrid=secDiv.querySelector('#cartaoGrid');
+    cartao.forEach(function(s){
+      var dn=getDisplayName(s.name);
+      var mgr=getMgr(s.name);
+      var mgrLbl=mgr==='ediel'?'Ediel':mgr==='rafael'?'Rafael':'—';
+      var mgrCol=mgr==='ediel'?'var(--blu)':mgr==='rafael'?'var(--pur)':'var(--t3)';
+      var card=document.createElement('div');
+      card.style='background:var(--s1);border:1px solid var(--b1);border-radius:var(--r12);padding:14px 16px';
+      card.innerHTML=
+        '<div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px" title="'+s.name+'">'+dn+'</div>'+
+        (dn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
+        '<div style="display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap">'+
+          '<span style="font-size:10px;background:rgba(96,165,250,.1);color:var(--blu);border:1px solid rgba(96,165,250,.2);padding:2px 8px;border-radius:20px">'+s.payLabel+'</span>'+
+          (s.fsdDisplay?'<span style="font-size:10px;color:var(--t3)">'+s.fsdDisplay+'</span>':'')+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:5px;margin-top:7px">'+
+          mgrChip(mgr)+
+          '<span style="font-size:11px;color:'+mgrCol+'">'+mgrLbl+'</span>'+
         '</div>';
-      }).join('')+
-      '</div>';
-    g.appendChild(dc);
+      cgrid.appendChild(card);
+    });
   }
 
-  if(semInfo.length){
-    var ds=document.createElement('div');ds.style='margin-top:20px';
-    ds.innerHTML='<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">'+semInfo.length+' contas — tipo de pagamento não identificado</p>'+
+  // ── SEÇÃO SEM INFO ────────────────────────────────────────────────────
+  var todas=cartao.concat(semInfo);
+  // Contas sem mapeamento de tipo — mostra como lista compacta
+  var naoMapeadas=ALL_SALDOS.filter(function(s){
+    return !pre.some(function(p){return p.id===s.id}) &&
+           !cartao.some(function(c){return c.id===s.id});
+  });
+  if(naoMapeadas.length){
+    var siDiv=document.createElement('div');
+    siDiv.style='margin-top:24px';
+    siDiv.innerHTML=
+      '<div style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">'+
+        naoMapeadas.length+' contas — tipo de pagamento a confirmar'+
+      '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
-      semInfo.map(function(s){return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t3)">'+getDisplayName(s.name)+'</span>'}).join('')+
+      naoMapeadas.map(function(s){
+        var dn=getDisplayName(s.name);
+        return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t2)">'+dn+'</span>';
+      }).join('')+
       '</div>';
-    g.appendChild(ds);
+    g.appendChild(siDiv);
   }
 }
 
