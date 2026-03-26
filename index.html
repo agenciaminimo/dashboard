@@ -1228,7 +1228,7 @@ function fetchSaldos(){
   ALL_SALDOS=[];hide('saldoErr');show('saldoPw');
   E('saldoPb').style.width='0%';txt('saldoPl','Buscando contas...');
   E('saldoGrid').innerHTML='';E('saldoSum').innerHTML='';txt('saldoCnt','—');
-  apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency,balance,funding_source_details&limit=200&access_token='+TOKEN)
+  apiFetch(BASE+'/me/adaccounts?fields=name,account_id,account_status,currency,balance,amount_spent,spend_cap,funding_source_details&limit=200&access_token='+TOKEN)
     .then(function(d){
       var acs=d.data||[],total=acs.length,done=0,active=[],BATCH=10,batches=[];
       for(var i=0;i<acs.length;i+=BATCH)batches.push(acs.slice(i,i+BATCH));
@@ -1236,18 +1236,31 @@ function fetchSaldos(){
         if(idx>=batches.length){hide('saldoPw');ALL_SALDOS=active;renderSaldos();return}
         Promise.all(batches[idx].map(function(ac){
           // Sempre busca 30 dias para calcular média diária de gasto (independente do filtro de data)
-          return apiFetch(BASE+'/'+ac.id+'/insights?fields=spend&date_preset=last_30d&access_token='+TOKEN)
+                    return apiFetch(BASE+'/'+ac.id+'/insights?fields=spend&date_preset=last_30d&access_token='+TOKEN)
             .then(function(d){return d.data&&d.data[0]?d.data[0]:null})
             .then(function(ins){
               done++;E('saldoPb').style.width=Math.round((done/total)*100)+'%';txt('saldoPl',done+' de '+total);
-              // balance da API Meta JÁ é o saldo disponível para anúncios (em centavos)
-              // NÃO aplicar taxa — o Meta já desconta impostos no momento da recarga
-              var bal=ac.balance?parseFloat(ac.balance)/100:null;
-              var isPost=(!ac.balance||ac.balance==='0'||bal===0||bal===null);
-              // Média diária = gasto 30d / 30 → estimativa de dias restantes
-              var daily=ins?parseFloat(ins.spend||0)/30:0;
-              var days=(bal&&bal>0&&daily>0)?Math.floor(bal/daily):null;
-              if(ac.account_status===1)active.push({id:ac.id,name:ac.name,cur:ac.currency||'BRL',balance:bal,isPost:isPost,daily:daily,days:days});
+              // Saldo disponível correto = spend_cap - amount_spent (limite restante)
+              // Ambos em centavos na API Meta → dividir por 100
+              var spendCap = ac.spend_cap ? parseFloat(ac.spend_cap) : 0;
+              var amtSpent = ac.amount_spent ? parseFloat(ac.amount_spent) : 0;
+              var capRestante = (spendCap > 0) ? (spendCap - amtSpent) / 100 : null;
+              // balance = saldo pré-pago (fallback se não tiver spend_cap)
+              var balPrepago = ac.balance ? parseFloat(ac.balance) / 100 : null;
+              // Usa capRestante se disponível, senão balPrepago
+              var bal = (capRestante !== null && capRestante >= 0) ? capRestante : balPrepago;
+              var isPost = (!bal || bal === 0);
+              // Média diária = gasto 30d / 30
+              var daily = ins ? parseFloat(ins.spend||0) / 30 : 0;
+              var days = (bal && bal > 0 && daily > 0) ? Math.floor(bal / daily) : null;
+              if(ac.account_status===1)active.push({
+                id:ac.id, name:ac.name, cur:ac.currency||'BRL',
+                balance:bal,          // saldo disponível (capRestante ou balPrepago)
+                spendCap:spendCap/100,
+                amtSpent:amtSpent/100,
+                balPrepago:balPrepago,
+                isPost:isPost, daily:daily, days:days
+              });
             })
             .catch(function(){done++;});
         })).then(function(){rB(idx+1)});
@@ -1258,48 +1271,76 @@ function fetchSaldos(){
 }
 function renderSaldos(){
   var q=(E('saldoQ').value||'').toLowerCase();
-  var list=ALL_SALDOS.filter(function(s){return!q||s.name.toLowerCase().indexOf(q)>=0||getDisplayName(s.name).toLowerCase().indexOf(q)>=0});
+  var list=ALL_SALDOS.filter(function(s){
+    return !q || s.name.toLowerCase().indexOf(q)>=0 || getDisplayName(s.name).toLowerCase().indexOf(q)>=0;
+  });
   list=list.slice().sort(function(a,b){
     if(SALDO_SORT==='saldo'){if(a.isPost&&!b.isPost)return 1;if(!a.isPost&&b.isPost)return-1;return(a.balance||9999)-(b.balance||9999)}
     if(SALDO_SORT==='dias'){if(a.days===null&&b.days!==null)return 1;if(a.days!==null&&b.days===null)return-1;return(a.days||999)-(b.days||999)}
     return getDisplayName(a.name).localeCompare(getDisplayName(b.name));
   });
-  var pre=list.filter(function(s){return!s.isPost});
+  var pre=list.filter(function(s){return !s.isPost});
   var alerts=pre.filter(function(s){return s.days!==null&&s.days<=5});
-  var total=pre.reduce(function(x,s){return x+(s.balance||0)},0);
-  var totalBruto=pre.reduce(function(x,s){return x+(s.balance||0)},0);
+  var totalDisp=pre.reduce(function(x,s){return x+(s.balance||0)},0);
+  var totalGasto=pre.reduce(function(x,s){return x+(s.amtSpent||0)},0);
+  var totalCap=pre.reduce(function(x,s){return x+(s.spendCap||0)},0);
+
   txt('saldoCnt',pre.length+' conta'+(pre.length!==1?'s':'')+' pré-pagas'+(alerts.length?' · '+alerts.length+' alerta'+(alerts.length>1?'s':''):''));
+
   E('saldoSum').innerHTML=[
-    {l:'Saldo líquido total',v:fmt(total,'cur'),sub:'após impostos'},
-    {l:'Saldo bruto total',v:fmt(totalBruto,'cur'),sub:'antes dos impostos'},
-    {l:'Pré-pagas ativas',v:pre.length,sub:'contas'},
-    {l:'Alertas ≤5 dias',v:alerts.length,sub:'contas críticas'},
-    {l:'Gasto/dia médio',v:pre.length?fmt(pre.reduce(function(x,s){return x+s.daily},0)/pre.length,'cur'):'—',sub:'por conta'},
-    {l:'Taxa de imposto BR',v:'13,83%',sub:'PIS+COFINS+ISS+IOF'},
-  ].map(function(x){return'<div class="ssumc"><div class="ssumb">'+x.l+'</div><div class="ssumv">'+x.v+'</div>'+(x.sub?'<div style="font-size:10px;color:var(--t3);margin-top:3px">'+x.sub+'</div>':'')+'</div>'}).join('');
+    {l:'Disponível total',     v:fmt(totalDisp,'cur'),   sub:'limite restante soma das contas'},
+    {l:'Total gasto',          v:fmt(totalGasto,'cur'),  sub:'amount spent acumulado'},
+    {l:'Limite total',         v:totalCap>0?fmt(totalCap,'cur'):'—', sub:'spend cap total'},
+    {l:'Contas pré-pagas',     v:pre.length,             sub:'contas ativas'},
+    {l:'Alertas ≤5 dias',      v:alerts.length,          sub:'requer atenção'},
+    {l:'Gasto/dia médio',      v:pre.length?fmt(pre.reduce(function(x,s){return x+s.daily},0)/pre.length,'cur'):'—', sub:'por conta (30d)'},
+  ].map(function(x){
+    return'<div class="ssumc"><div class="ssumb">'+x.l+'</div><div class="ssumv">'+x.v+'</div>'+
+      (x.sub?'<div style="font-size:10px;color:var(--t3);margin-top:2px">'+x.sub+'</div>':'')+'</div>';
+  }).join('');
+
   var g=E('saldoGrid');g.innerHTML='';
   pre.forEach(function(s){
     var dn=getDisplayName(s.name);
-    var bc=s.balance===null?'':s.balance>500?'hi':s.balance>200?'mi':s.balance>100?'lo':'cr';
+    // Cores baseadas no saldo disponível
+    var bc=s.balance===null?'':s.balance>1000?'hi':s.balance>400?'mi':s.balance>150?'lo':'cr';
     var dc=s.days===null?'':s.days>10?'ok':s.days>5?'wn':'cr';
     var cc='sc'+(s.days!==null&&s.days<=3?' al':s.days!==null&&s.days<=5?' aw':'');
+    // % do limite já usado
+    var pctUsado=(s.spendCap>0)?Math.min(100,Math.round((s.amtSpent/s.spendCap)*100)):0;
     var card=document.createElement('div');card.className=cc;
-    var balanceDisplay=s.balance?fmt(s.balance,'cur',s.cur):null;
-    card.innerHTML='<div class="sc-name" title="'+s.name+'">'+dn+'</div>'+
+    card.innerHTML=
+      '<div class="sc-name" title="'+s.name+'">'+dn+'</div>'+
       (dn!==s.name?'<div style="font-size:10px;color:var(--t3);margin-top:-8px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>':'')+
       '<div class="sa '+bc+'">'+fmt(s.balance,'cur',s.cur)+'</div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-top:2px;margin-bottom:2px">disponível p/ anúncios</div>'+
-      (balanceDisplay?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Bruto: '+balanceDisplay+' · −13,83% impostos</div>':'')+
-      '<div class="sc-meta"><span class="sc-tag">Pré-pago</span><span style="font-size:10px;color:var(--t3)">R$/dia '+fmt(s.daily,'cur',s.cur)+'</span></div>'+
-      '<div class="sc-days"><span style="color:var(--t3)">Estimativa</span><span class="dv '+dc+'">'+(s.days!==null?s.days+' dias':'—')+'</span></div>'+
-      '<div class="bbar"><div class="bf '+dc+'" style="width:'+Math.min(100,s.days!==null?Math.round(s.days/30*100):0)+'%"></div></div>';
+      '<div style="font-size:10px;color:var(--t3);margin-top:2px;margin-bottom:6px">disponível (limite restante)</div>'+
+      (s.spendCap>0?
+        '<div style="font-size:10px;color:var(--t3);margin-bottom:6px">'+
+          'Gasto: '+fmt(s.amtSpent,'cur',s.cur)+' / Limite: '+fmt(s.spendCap,'cur',s.cur)+
+          ' <span style="color:'+(pctUsado>90?'var(--red)':pctUsado>75?'var(--ylw)':'var(--t3)')+';">('+pctUsado+'%)</span>'+
+        '</div>'
+      : (s.balPrepago?'<div style="font-size:10px;color:var(--t3);margin-bottom:6px">Saldo pré-pago</div>':''))+
+      '<div class="sc-meta">'+
+        '<span class="sc-tag">Pré-pago</span>'+
+        '<span style="font-size:10px;color:var(--t3)">R$/dia '+fmt(s.daily,'cur',s.cur)+'</span>'+
+      '</div>'+
+      '<div class="sc-days">'+
+        '<span style="color:var(--t3)">Estimativa</span>'+
+        '<span class="dv '+dc+'">'+(s.days!==null?s.days+' dias':'—')+'</span>'+
+      '</div>'+
+      // Barra de progresso do limite (gasto%)
+      '<div class="bbar"><div class="bf '+(pctUsado>90?'cr':pctUsado>75?'wn':'ok')+'" style="width:'+pctUsado+'%"></div></div>'+
+      '<div style="font-size:9px;color:var(--t3);text-align:right;margin-top:2px">'+pctUsado+'% do limite usado</div>';
     g.appendChild(card);
   });
+
   var post=list.filter(function(s){return s.isPost});
   if(post.length){
     var d=document.createElement('div');d.style='margin-top:20px';
     d.innerHTML='<p style="font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">'+post.length+' contas pós-pagas / cartão</p>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:5px">'+post.map(function(s){return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t3)">'+getDisplayName(s.name)+'</span>'}).join('')+'</div>';
+      '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
+      post.map(function(s){return'<span style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r8);padding:4px 10px;font-size:11px;color:var(--t3)">'+getDisplayName(s.name)+'</span>'}).join('')+
+      '</div>';
     g.appendChild(d);
   }
 }
